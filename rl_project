@@ -1,0 +1,2203 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "codemirror_mode": {
+        "name": "ipython",
+        "version": 3
+      },
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "nbconvert_exporter": "python",
+      "pygments_lexer": "ipython3",
+      "version": "3.6.5"
+    },
+    "colab": {
+      "name": "DQN_project_MVA.ipynb",
+      "provenance": [],
+      "collapsed_sections": []
+    },
+    "accelerator": "GPU"
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Qc1CtDditpUF",
+        "colab_type": "text"
+      },
+      "source": [
+        "**You may need to install [OpenCV](https://pypi.python.org/pypi/opencv-python) and [scikit-video](http://www.scikit-video.org/stable/).**"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "CV1HZCiXt9cu",
+        "colab_type": "code",
+        "outputId": "286281a4-5747-4cac-8bc9-6b2ebf4137c6",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 156
+        }
+      },
+      "source": [
+        "!pip install scikit-video"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Collecting scikit-video\n",
+            "\u001b[?25l  Downloading https://files.pythonhosted.org/packages/b1/a6/c69cad508139a342810ae46e946ebb3256aa6e42f690d901bb68f50582e3/scikit_video-1.1.11-py2.py3-none-any.whl (2.3MB)\n",
+            "\r\u001b[K     |▏                               | 10kB 20.3MB/s eta 0:00:01\r\u001b[K     |▎                               | 20kB 7.0MB/s eta 0:00:01\r\u001b[K     |▍                               | 30kB 7.5MB/s eta 0:00:01\r\u001b[K     |▋                               | 40kB 6.2MB/s eta 0:00:01\r\u001b[K     |▊                               | 51kB 6.7MB/s eta 0:00:01\r\u001b[K     |▉                               | 61kB 8.0MB/s eta 0:00:01\r\u001b[K     |█                               | 71kB 8.1MB/s eta 0:00:01\r\u001b[K     |█▏                              | 81kB 7.8MB/s eta 0:00:01\r\u001b[K     |█▎                              | 92kB 8.6MB/s eta 0:00:01\r\u001b[K     |█▌                              | 102kB 8.9MB/s eta 0:00:01\r\u001b[K     |█▋                              | 112kB 8.9MB/s eta 0:00:01\r\u001b[K     |█▊                              | 122kB 8.9MB/s eta 0:00:01\r\u001b[K     |██                              | 133kB 8.9MB/s eta 0:00:01\r\u001b[K     |██                              | 143kB 8.9MB/s eta 0:00:01\r\u001b[K     |██▏                             | 153kB 8.9MB/s eta 0:00:01\r\u001b[K     |██▎                             | 163kB 8.9MB/s eta 0:00:01\r\u001b[K     |██▌                             | 174kB 8.9MB/s eta 0:00:01\r\u001b[K     |██▋                             | 184kB 8.9MB/s eta 0:00:01\r\u001b[K     |██▊                             | 194kB 8.9MB/s eta 0:00:01\r\u001b[K     |███                             | 204kB 8.9MB/s eta 0:00:01\r\u001b[K     |███                             | 215kB 8.9MB/s eta 0:00:01\r\u001b[K     |███▏                            | 225kB 8.9MB/s eta 0:00:01\r\u001b[K     |███▍                            | 235kB 8.9MB/s eta 0:00:01\r\u001b[K     |███▌                            | 245kB 8.9MB/s eta 0:00:01\r\u001b[K     |███▋                            | 256kB 8.9MB/s eta 0:00:01\r\u001b[K     |███▉                            | 266kB 8.9MB/s eta 0:00:01\r\u001b[K     |████                            | 276kB 8.9MB/s eta 0:00:01\r\u001b[K     |████                            | 286kB 8.9MB/s eta 0:00:01\r\u001b[K     |████▏                           | 296kB 8.9MB/s eta 0:00:01\r\u001b[K     |████▍                           | 307kB 8.9MB/s eta 0:00:01\r\u001b[K     |████▌                           | 317kB 8.9MB/s eta 0:00:01\r\u001b[K     |████▋                           | 327kB 8.9MB/s eta 0:00:01\r\u001b[K     |████▉                           | 337kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████                           | 348kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████                           | 358kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████▎                          | 368kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████▍                          | 378kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████▌                          | 389kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████▊                          | 399kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████▉                          | 409kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████                          | 419kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████                          | 430kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████▎                         | 440kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████▍                         | 450kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████▌                         | 460kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████▊                         | 471kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████▉                         | 481kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████                         | 491kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████▏                        | 501kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████▎                        | 512kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████▍                        | 522kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████▋                        | 532kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████▊                        | 542kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████▉                        | 552kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████                        | 563kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████▏                       | 573kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████▎                       | 583kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████▍                       | 593kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████▋                       | 604kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████▊                       | 614kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████▉                       | 624kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████                       | 634kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████▏                      | 645kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████▎                      | 655kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████▌                      | 665kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████▋                      | 675kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████▊                      | 686kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████▉                      | 696kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████                      | 706kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████▏                     | 716kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████▎                     | 727kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████▌                     | 737kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████▋                     | 747kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████▊                     | 757kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████                     | 768kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████                     | 778kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████▏                    | 788kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████▍                    | 798kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████▌                    | 808kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████▋                    | 819kB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████▊                    | 829kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████                    | 839kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████                    | 849kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████▏                   | 860kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████▍                   | 870kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████▌                   | 880kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████▋                   | 890kB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████▉                   | 901kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████                   | 911kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████                   | 921kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████▎                  | 931kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████▍                  | 942kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████▌                  | 952kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████▋                  | 962kB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████▉                  | 972kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████                  | 983kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████                  | 993kB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████▎                 | 1.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████▍                 | 1.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████▌                 | 1.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████▊                 | 1.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████▉                 | 1.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████                 | 1.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████▏                | 1.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████▎                | 1.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████▍                | 1.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████▌                | 1.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████▊                | 1.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████▉                | 1.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████                | 1.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████▏               | 1.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████▎               | 1.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████▍               | 1.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████▋               | 1.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████▊               | 1.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████▉               | 1.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████               | 1.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████▏              | 1.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████▎              | 1.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████▍              | 1.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████▋              | 1.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████▊              | 1.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████▉              | 1.3MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████              | 1.3MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████▏             | 1.3MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████▎             | 1.3MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████▌             | 1.3MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████▋             | 1.3MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████▊             | 1.3MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████             | 1.3MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████             | 1.3MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████▏            | 1.4MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████▎            | 1.4MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████▌            | 1.4MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████▋            | 1.4MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████▊            | 1.4MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████            | 1.4MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████            | 1.4MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████▏           | 1.4MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████▍           | 1.4MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████▌           | 1.4MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████▋           | 1.5MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████▉           | 1.5MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████           | 1.5MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████           | 1.5MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████▏          | 1.5MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████▍          | 1.5MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████▌          | 1.5MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████▋          | 1.5MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████▉          | 1.5MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████          | 1.5MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████          | 1.6MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████▎         | 1.6MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████▍         | 1.6MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████▌         | 1.6MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████▊         | 1.6MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████▉         | 1.6MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████         | 1.6MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████         | 1.6MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████▎        | 1.6MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████▍        | 1.6MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████▌        | 1.7MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████▊        | 1.7MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████▉        | 1.7MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████        | 1.7MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████▏       | 1.7MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████▎       | 1.7MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████▍       | 1.7MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████▋       | 1.7MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████▊       | 1.7MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████▉       | 1.8MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████       | 1.8MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████▏      | 1.8MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████▎      | 1.8MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████▍      | 1.8MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████▋      | 1.8MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████▊      | 1.8MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████▉      | 1.8MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████      | 1.8MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████▏     | 1.8MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████▎     | 1.9MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████▌     | 1.9MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████▋     | 1.9MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████▊     | 1.9MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████▉     | 1.9MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████████     | 1.9MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████████▏    | 1.9MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████████▎    | 1.9MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████████▌    | 1.9MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████████▋    | 1.9MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████████▊    | 2.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████████    | 2.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████████    | 2.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████████▏   | 2.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████████▍   | 2.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████████▌   | 2.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████████▋   | 2.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████████▊   | 2.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████████   | 2.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████████   | 2.0MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████████▏  | 2.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████████▍  | 2.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████████▌  | 2.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████████▋  | 2.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |█████████████████████████████▉  | 2.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████████  | 2.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████████  | 2.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████████▎ | 2.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████████▍ | 2.1MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████████▌ | 2.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████████▋ | 2.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |██████████████████████████████▉ | 2.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████████████ | 2.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████████████ | 2.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████████████▎| 2.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████████████▍| 2.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████████████▌| 2.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████████████▊| 2.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |███████████████████████████████▉| 2.2MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████████████| 2.3MB 8.9MB/s eta 0:00:01\r\u001b[K     |████████████████████████████████| 2.3MB 8.9MB/s \n",
+            "\u001b[?25hRequirement already satisfied: scipy in /usr/local/lib/python3.6/dist-packages (from scikit-video) (1.4.1)\n",
+            "Requirement already satisfied: numpy in /usr/local/lib/python3.6/dist-packages (from scikit-video) (1.17.5)\n",
+            "Requirement already satisfied: pillow in /usr/local/lib/python3.6/dist-packages (from scikit-video) (6.2.2)\n",
+            "Installing collected packages: scikit-video\n",
+            "Successfully installed scikit-video-1.1.11\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "HyU7qfyBtpUN",
+        "colab_type": "code",
+        "outputId": "25e545a0-a53d-4f38-9735-a6eabd2fdb90",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 81
+        }
+      },
+      "source": [
+        "import keras\n",
+        "import numpy as np\n",
+        "import io\n",
+        "import base64\n",
+        "from IPython.display import HTML\n",
+        "import skvideo.io\n",
+        "import cv2\n",
+        "import json\n",
+        "\n",
+        "from keras.models import Sequential,model_from_json\n",
+        "from keras.layers.core import Dense\n",
+        "from keras.optimizers import sgd\n",
+        "from keras.layers import Conv2D, MaxPooling2D, Activation, AveragePooling2D,Reshape,BatchNormalization"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Using TensorFlow backend.\n"
+          ],
+          "name": "stderr"
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/html": [
+              "<p style=\"color: red;\">\n",
+              "The default version of TensorFlow in Colab will soon switch to TensorFlow 2.x.<br>\n",
+              "We recommend you <a href=\"https://www.tensorflow.org/guide/migrate\" target=\"_blank\">upgrade</a> now \n",
+              "or ensure your notebook will continue to use TensorFlow 1.x via the <code>%tensorflow_version 1.x</code> magic:\n",
+              "<a href=\"https://colab.research.google.com/notebooks/tensorflow_version.ipynb\" target=\"_blank\">more info</a>.</p>\n"
+            ],
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "eQ2zGIZhtpUX",
+        "colab_type": "text"
+      },
+      "source": [
+        "# MiniProject on Deep Reinforcement Learning"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "H0HpeJrptpUZ",
+        "colab_type": "text"
+      },
+      "source": [
+        "__Notations__: $E_p$ is the expectation under probability $p$. Please justify each of your answer and widely comment your code."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "1oh6-YAgtpUd",
+        "colab_type": "text"
+      },
+      "source": [
+        "# Context"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "KsfXBHaAtpUi",
+        "colab_type": "text"
+      },
+      "source": [
+        "In a reinforcement learning algorithm, we modelize each step $t$ as an action $a_t$ obtained from a state $s_t$, i.e. $\\{(a_{t},s_{t})_{t\\leq T}\\}$ having the Markov property. We consider a discount factor $\\gamma \\in [0,1]$ that ensures convergence. The goal is to find among all the policies $\\pi$, one that maximizes the expected reward:\n",
+        "\n",
+        "\\begin{equation*}\n",
+        "R(\\pi)=\\sum_{t\\leq T}E_{p^{\\pi}}[\\gamma^t r(s_{t},a_{t})] \\> ,\n",
+        "\\end{equation*}\n",
+        "\n",
+        "where: \n",
+        "\\begin{equation*}p^{\\pi}(a_{0},a_{1},s_{1},...,a_{T},s_{T})=p(a_{0})\\prod_{t=1}^{T}\\pi(a_{t}|s_{t})p(s_{t+1}|s_{t},a_{t}) \\> .\n",
+        "\\end{equation*}\n",
+        "\n",
+        "We note the $Q$-function:\n",
+        "\n",
+        "\\begin{equation*}Q^\\pi(s,a)=E_{p^{\\pi}}[\\sum_{t\\leq T}\\gamma^{t}r(s_{t},a_{t})|s_{0}=s,a_{0}=a] \\> .\n",
+        "\\end{equation*}\n",
+        "\n",
+        "Thus, the optimal Q function is:\n",
+        "\\begin{equation*}\n",
+        "Q^*(s,a)=\\max_{\\pi}Q^\\pi(s,a) \\> .\n",
+        "\\end{equation*}\n",
+        "\n",
+        "In this project, we will apply the deep reinforcement learning techniques to a simple game: an agent will have to learn from scratch a policy that will permit it maximizing a reward."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "r8zsAfHftpUr",
+        "colab_type": "text"
+      },
+      "source": [
+        "## The environment, the agent and the game"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "TrRZJ90ntpU6",
+        "colab_type": "text"
+      },
+      "source": [
+        "### The environment"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "a7-bnA49tpU8",
+        "colab_type": "text"
+      },
+      "source": [
+        "```Environment``` is an abstract class that represents the states, rewards, and actions to obtain the new state."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "dkv9KfhAtpU-",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "class Environment(object):\n",
+        "    def __init__(self):\n",
+        "        pass\n",
+        "\n",
+        "    def act(self, act):\n",
+        "        \"\"\"\n",
+        "        One can act on the environment and obtain its reaction:\n",
+        "        - the new state\n",
+        "        - the reward of the new state\n",
+        "        - should we continue the game?\n",
+        "\n",
+        "        :return: state, reward, game_over\n",
+        "        \"\"\"\n",
+        "        pass\n",
+        "\n",
+        "\n",
+        "    def reset(self):\n",
+        "        \"\"\"\n",
+        "        Reinitialize the environment to a random state and returns\n",
+        "        the original state\n",
+        "\n",
+        "        :return: state\n",
+        "        \"\"\"\n",
+        "        pass\n",
+        "    \n",
+        "    def draw(self):\n",
+        "        \"\"\"\n",
+        "        Visualize in the console or graphically the current state\n",
+        "        \"\"\"\n",
+        "        pass"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "bgwFgPK0tpVN",
+        "colab_type": "text"
+      },
+      "source": [
+        "The method ```act``` allows to act on the environment at a given state $s_t$ (stored internally), via action $a_t$. The method will return the new state $s_{t+1}$, the reward $r(s_{t},a_{t})$ and determines if $t\\leq T$ (*game_over*).\n",
+        "\n",
+        "The method ```reset``` simply reinitializes the environment to a random state $s_0$.\n",
+        "\n",
+        "The method ```draw``` displays the current state $s_t$ (this is useful to check the behavior of the Agent).\n",
+        "\n",
+        "We modelize $s_t$ as a tensor, while $a_t$ is an integer."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "kRs-HkRYtpVQ",
+        "colab_type": "text"
+      },
+      "source": [
+        "### The Agent"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "1cibOx4rtpVq",
+        "colab_type": "text"
+      },
+      "source": [
+        "The goal of the ```Agent``` is to interact with the ```Environment``` by proposing actions $a_t$ obtained from a given state $s_t$ to attempt to maximize its __reward__ $r(s_t,a_t)$. We propose the following abstract class:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "qBzPDjtEtpVs",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "class Agent(object):\n",
+        "    def __init__(self, epsilon=0.1, n_action=4):\n",
+        "        self.epsilon = epsilon\n",
+        "        self.n_action = n_action\n",
+        "    \n",
+        "    def set_epsilon(self,e):\n",
+        "        self.epsilon = e\n",
+        "\n",
+        "    def act(self,s,train=True):\n",
+        "        \"\"\" This function should return the next action to do:\n",
+        "        an integer between 0 and 4 (not included) with a random exploration of epsilon\"\"\"\n",
+        "        if train:\n",
+        "            if np.random.rand() <= self.epsilon:\n",
+        "                a = np.random.randint(0, self.n_action, size=1)[0]\n",
+        "            else:\n",
+        "                a = self.learned_act(s)\n",
+        "        else: # in some cases, this can improve the performance.. remove it if poor performances\n",
+        "            a = self.learned_act(s)\n",
+        "\n",
+        "        return a\n",
+        "\n",
+        "    def learned_act(self,s):\n",
+        "        \"\"\" Act via the policy of the agent, from a given state s\n",
+        "        it proposes an action a\"\"\"\n",
+        "        pass\n",
+        "\n",
+        "    def reinforce(self, s, n_s, a, r, game_over_):\n",
+        "        \"\"\" This function is the core of the learning algorithm. \n",
+        "        It takes as an input the current state s_, the next state n_s_\n",
+        "        the action a_ used to move from s_ to n_s_ and the reward r_.\n",
+        "        \n",
+        "        Its goal is to learn a policy.\n",
+        "        \"\"\"\n",
+        "        pass\n",
+        "\n",
+        "    def save(self):\n",
+        "        \"\"\" This function returns basic stats if applicable: the\n",
+        "        loss and/or the model\"\"\"\n",
+        "        pass\n",
+        "\n",
+        "    def load(self):\n",
+        "        \"\"\" This function allows to restore a model\"\"\"\n",
+        "        pass"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "mu4ziSFctpV0",
+        "colab_type": "text"
+      },
+      "source": [
+        "***\n",
+        "__Question 1__:\n",
+        "Explain the function act. Why is ```epsilon``` essential?"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "vvxXqNystpV2",
+        "colab_type": "text"
+      },
+      "source": [
+        "Exploration Exploitation Dilemma."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "LUcN08SktpV6",
+        "colab_type": "text"
+      },
+      "source": [
+        "***\n",
+        "### The Game"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "0E2_BGoutpV7",
+        "colab_type": "text"
+      },
+      "source": [
+        "The ```Agent``` and the ```Environment``` work in an interlaced way as in the following (take some time to understand this code as it is the core of the project)\n",
+        "\n",
+        "```python\n",
+        "\n",
+        "epoch = 300\n",
+        "env = Environment()\n",
+        "agent = Agent()\n",
+        "\n",
+        "\n",
+        "# Number of won games\n",
+        "score = 0\n",
+        "loss = 0\n",
+        "\n",
+        "\n",
+        "for e in range(epoch):\n",
+        "    # At each epoch, we restart to a fresh game and get the initial state\n",
+        "    state = env.reset()\n",
+        "    # This assumes that the games will end\n",
+        "    game_over = False\n",
+        "\n",
+        "    win = 0\n",
+        "    lose = 0\n",
+        "    \n",
+        "    while not game_over:\n",
+        "        # The agent performs an action\n",
+        "        action = agent.act(state)\n",
+        "\n",
+        "        # Apply an action to the environment, get the next state, the reward\n",
+        "        # and if the games end\n",
+        "        prev_state = state\n",
+        "        state, reward, game_over = env.act(action)\n",
+        "\n",
+        "        # Update the counters\n",
+        "        if reward > 0:\n",
+        "            win = win + reward\n",
+        "        if reward < 0:\n",
+        "            lose = lose -reward\n",
+        "\n",
+        "        # Apply the reinforcement strategy\n",
+        "        loss = agent.reinforce(prev_state, state,  action, reward, game_over)\n",
+        "\n",
+        "    # Save as a mp4\n",
+        "    if e % 10 == 0:\n",
+        "        env.draw(e)\n",
+        "\n",
+        "    # Update stats\n",
+        "    score += win-lose\n",
+        "\n",
+        "    print(\"Epoch {:03d}/{:03d} | Loss {:.4f} | Win/lose count {}/{} ({})\"\n",
+        "          .format(e, epoch, loss, win, lose, win-lose))\n",
+        "    agent.save()\n",
+        "```"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "brFhBtFOtpV8",
+        "colab_type": "text"
+      },
+      "source": [
+        "# The game, *eat cheese*"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "jkoBPJNatpV-",
+        "colab_type": "text"
+      },
+      "source": [
+        "A rat runs on an island and tries to eat as much as possible. The island is subdivided into $N\\times N$ cells, in which there are cheese (+0.5) and poisonous cells (-1). The rat has a visibility of 2 cells (thus it can see $5^2$ cells). The rat is given a time $T$ to accumulate as much food as possible. It can perform 4 actions: going up, down, left, right. \n",
+        "\n",
+        "The goal is to code an agent to solve this task that will learn by trial and error. We propose the following environment:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "aktxfUqCtpWA",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "class Environment(object):\n",
+        "    def __init__(self, grid_size=10, max_time=500, temperature=0.1):\n",
+        "        grid_size = grid_size+4\n",
+        "        self.grid_size = grid_size\n",
+        "        self.max_time = max_time\n",
+        "        self.temperature = temperature\n",
+        "\n",
+        "        #board on which one plays\n",
+        "        self.board = np.zeros((grid_size,grid_size))\n",
+        "        self.position = np.zeros((grid_size,grid_size))\n",
+        "\n",
+        "        # coordinate of the cat\n",
+        "        self.x = 0\n",
+        "        self.y = 1\n",
+        "\n",
+        "        # self time\n",
+        "        self.t = 0\n",
+        "\n",
+        "        self.scale=16\n",
+        "\n",
+        "        self.to_draw = np.zeros((max_time+2, grid_size*self.scale, grid_size*self.scale, 3))\n",
+        "\n",
+        "\n",
+        "    def draw(self,e):\n",
+        "        skvideo.io.vwrite(str(e) + '.mp4', self.to_draw)\n",
+        "\n",
+        "    def get_frame(self,t):\n",
+        "        b = np.zeros((self.grid_size,self.grid_size,3))+128\n",
+        "        b[self.board>0,0] = 256\n",
+        "        b[self.board < 0, 2] = 256\n",
+        "        b[self.x,self.y,:]=256\n",
+        "        b[-2:,:,:]=0\n",
+        "        b[:,-2:,:]=0\n",
+        "        b[:2,:,:]=0\n",
+        "        b[:,:2,:]=0\n",
+        "        \n",
+        "        b =  cv2.resize(b, None, fx=self.scale, fy=self.scale, interpolation=cv2.INTER_NEAREST)\n",
+        "\n",
+        "        self.to_draw[t,:,:,:]=b\n",
+        "\n",
+        "\n",
+        "    def act(self, action):\n",
+        "        \"\"\"This function returns the new state, reward and decides if the\n",
+        "        game ends.\"\"\"\n",
+        "\n",
+        "        self.get_frame(int(self.t))\n",
+        "\n",
+        "        self.position = np.zeros((self.grid_size, self.grid_size))\n",
+        "\n",
+        "        self.position[0:2,:]= -1\n",
+        "        self.position[:,0:2] = -1\n",
+        "        self.position[-2:, :] = -1\n",
+        "        self.position[-2:, :] = -1\n",
+        "\n",
+        "        self.position[self.x, self.y] = 1\n",
+        "        if action == 0:\n",
+        "            if self.x == self.grid_size-3:\n",
+        "                self.x = self.x-1\n",
+        "            else:\n",
+        "                self.x = self.x + 1\n",
+        "        elif action == 1:\n",
+        "            if self.x == 2:\n",
+        "                self.x = self.x+1\n",
+        "            else:\n",
+        "                self.x = self.x-1\n",
+        "        elif action == 2:\n",
+        "            if self.y == self.grid_size - 3:\n",
+        "                self.y = self.y - 1\n",
+        "            else:\n",
+        "                self.y = self.y + 1\n",
+        "        elif action == 3:\n",
+        "            if self.y == 2:\n",
+        "                self.y = self.y + 1\n",
+        "            else:\n",
+        "                self.y = self.y - 1\n",
+        "        else:\n",
+        "            RuntimeError('Error: action not recognized')\n",
+        "\n",
+        "        self.t = self.t + 1\n",
+        "        reward = self.board[self.x, self.y]\n",
+        "        self.board[self.x, self.y] = 0\n",
+        "        game_over = self.t > self.max_time\n",
+        "        state = np.concatenate((self.board.reshape(self.grid_size, self.grid_size,1),\n",
+        "                        self.position.reshape(self.grid_size, self.grid_size,1)),axis=2)\n",
+        "        state = state[self.x-2:self.x+3,self.y-2:self.y+3,:]\n",
+        "\n",
+        "        return state, reward, game_over\n",
+        "\n",
+        "    def reset(self):\n",
+        "        \"\"\"This function resets the game and returns the initial state\"\"\"\n",
+        "\n",
+        "        self.x = np.random.randint(3, self.grid_size-3, size=1)[0]\n",
+        "        self.y = np.random.randint(3, self.grid_size-3, size=1)[0]\n",
+        "\n",
+        "\n",
+        "        bonus = 0.5*np.random.binomial(1,self.temperature,size=self.grid_size**2)\n",
+        "        bonus = bonus.reshape(self.grid_size,self.grid_size)\n",
+        "\n",
+        "        malus = -1.0*np.random.binomial(1,self.temperature,size=self.grid_size**2)\n",
+        "        malus = malus.reshape(self.grid_size, self.grid_size)\n",
+        "\n",
+        "        self.to_draw = np.zeros((self.max_time+2, self.grid_size*self.scale, self.grid_size*self.scale, 3))\n",
+        "\n",
+        "\n",
+        "        malus[bonus>0]=0\n",
+        "\n",
+        "        self.board = bonus + malus\n",
+        "\n",
+        "        self.position = np.zeros((self.grid_size, self.grid_size))\n",
+        "        self.position[0:2,:]= -1\n",
+        "        self.position[:,0:2] = -1\n",
+        "        self.position[-2:, :] = -1\n",
+        "        # self.position[-2:, :] = -1\n",
+        "        self.position[:, -2:] = -1\n",
+        "        self.board[self.x,self.y] = 0\n",
+        "        self.t = 0\n",
+        "\n",
+        "        state = np.concatenate((\n",
+        "                               self.board.reshape(self.grid_size, self.grid_size,1),\n",
+        "                        self.position.reshape(self.grid_size, self.grid_size,1)),axis=2)\n",
+        "\n",
+        "        state = state[self.x - 2:self.x + 3, self.y - 2:self.y + 3, :]\n",
+        "        return state"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "ML_t8jQntpWD",
+        "colab_type": "text"
+      },
+      "source": [
+        "The following elements are important because they correspond to the hyper parameters for this project:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "y8Pv2itetpWD",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# parameters\n",
+        "size = 13\n",
+        "T=200\n",
+        "temperature=0.3\n",
+        "epochs_train=100 # set small when debugging\n",
+        "epochs_test=20 # set small when debugging\n",
+        "\n",
+        "# display videos\n",
+        "def display_videos(name):\n",
+        "    video = io.open(name, 'r+b').read()\n",
+        "    encoded = base64.b64encode(video)\n",
+        "    return '''<video alt=\"test\" controls>\n",
+        "                <source src=\"data:video/mp4;base64,{0}\" type=\"video/mp4\" />\n",
+        "             </video>'''.format(encoded.decode('ascii'))"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "mykI5N50tpWL",
+        "colab_type": "text"
+      },
+      "source": [
+        "__Question 2__ Explain the use of the arrays ```position``` and ```board```."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "ueinjX52tpWN",
+        "colab_type": "text"
+      },
+      "source": [
+        "position: position of the agent (x, y) = 1 and 2cells far = 2 and all others = 0.\n",
+        "\n",
+        "board: reward computed by bonus+malus => cheese or poison and used to get the reward at each state of the grid."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "II3iu3Q8tpWO",
+        "colab_type": "text"
+      },
+      "source": [
+        "## Random Agent"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "CJ_Of2A0tpWP",
+        "colab_type": "text"
+      },
+      "source": [
+        "***\n",
+        "__Question 3__ Implement a random Agent (only ```learned_act``` needs to be implemented):"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "keUwGTHRtpWQ",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "class RandomAgent(Agent):\n",
+        "    def __init__(self):\n",
+        "        super(RandomAgent, self).__init__()\n",
+        "        pass\n",
+        "\n",
+        "    # Random Action as it is a Random Agent\n",
+        "    def learned_act(self, s):\n",
+        "        return(np.random.randint(0, self.n_action, size=1)[0])"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Ni1kMc48tpWV",
+        "colab_type": "text"
+      },
+      "source": [
+        "***\n",
+        "***\n",
+        "__Question 4__ Visualize the game moves. You need to fill in the following function for the evaluation:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "2vzixzePtpWW",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "def test(agent,env,epochs,prefix=''):\n",
+        "    # Number of won games\n",
+        "    score = 0\n",
+        "        \n",
+        "    for e in range(epochs):\n",
+        "        # At each epoch, we restart to a fresh game and get the initial state\n",
+        "        state = env.reset()\n",
+        "        \n",
+        "        # This assumes that the games will end\n",
+        "        game_over = False\n",
+        "\n",
+        "        win = 0\n",
+        "        lose = 0\n",
+        "\n",
+        "        while not game_over:\n",
+        "            # The Random Agent performs a Random Action\n",
+        "            action = agent.learned_act(state)\n",
+        "\n",
+        "            # Apply an action to the environment, get the next state, the reward\n",
+        "            # and if the games end\n",
+        "            prev_state = state\n",
+        "            state, reward, game_over = env.act(action)\n",
+        "\n",
+        "            # Update the counters\n",
+        "            if reward > 0:\n",
+        "                win = win + reward\n",
+        "            if reward < 0:\n",
+        "                lose = lose - reward\n",
+        "        \n",
+        "        # Save as a mp4\n",
+        "        env.draw(prefix+str(e))\n",
+        "\n",
+        "        # Update stats\n",
+        "        score = score + win-lose\n",
+        "\n",
+        "        print(\"Win/lose count {}/{}. Average score ({})\"\n",
+        "              .format(win, lose, score/(1+e)))\n",
+        "    print('Final score: '+str(score/epochs))"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "tLtB7vP1tpWa",
+        "colab_type": "code",
+        "outputId": "56e33162-8435-4fd7-83a1-45bc46eba20d",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 1000
+        }
+      },
+      "source": [
+        "# Initialize the game\n",
+        "env = Environment(grid_size=size, max_time=T,temperature=temperature)\n",
+        "\n",
+        "# Initialize the agent!\n",
+        "agent = RandomAgent()\n",
+        "\n",
+        "test(agent,env,epochs_test,prefix='random')\n",
+        "HTML(display_videos('random0.mp4'))"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Win/lose count 5.5/11.0. Average score (-5.5)\n",
+            "Win/lose count 11.0/17.0. Average score (-5.75)\n",
+            "Win/lose count 12.5/11.0. Average score (-3.3333333333333335)\n",
+            "Win/lose count 9.0/11.0. Average score (-3.0)\n",
+            "Win/lose count 4.5/18.0. Average score (-5.1)\n",
+            "Win/lose count 9.0/23.0. Average score (-6.583333333333333)\n",
+            "Win/lose count 7.5/16.0. Average score (-6.857142857142857)\n",
+            "Win/lose count 10.0/14.0. Average score (-6.5)\n",
+            "Win/lose count 11.0/19.0. Average score (-6.666666666666667)\n",
+            "Win/lose count 11.5/15.0. Average score (-6.35)\n",
+            "Win/lose count 8.5/17.0. Average score (-6.545454545454546)\n",
+            "Win/lose count 12.0/18.0. Average score (-6.5)\n",
+            "Win/lose count 11.0/17.0. Average score (-6.461538461538462)\n",
+            "Win/lose count 10.5/17.0. Average score (-6.464285714285714)\n",
+            "Win/lose count 9.0/16.0. Average score (-6.5)\n",
+            "Win/lose count 7.5/19.0. Average score (-6.8125)\n",
+            "Win/lose count 8.5/8.0. Average score (-6.382352941176471)\n",
+            "Win/lose count 11.0/15.0. Average score (-6.25)\n",
+            "Win/lose count 8.0/8.0. Average score (-5.921052631578948)\n",
+            "Win/lose count 10.0/19.0. Average score (-6.075)\n",
+            "Win/lose count 8.0/18.0. Average score (-6.261904761904762)\n",
+            "Win/lose count 13.5/11.0. Average score (-5.863636363636363)\n",
+            "Win/lose count 11.0/23.0. Average score (-6.130434782608695)\n",
+            "Win/lose count 8.0/7.0. Average score (-5.833333333333333)\n",
+            "Win/lose count 10.0/15.0. Average score (-5.8)\n",
+            "Win/lose count 10.5/10.0. Average score (-5.5576923076923075)\n",
+            "Win/lose count 7.0/10.0. Average score (-5.462962962962963)\n",
+            "Win/lose count 6.0/12.0. Average score (-5.482142857142857)\n",
+            "Win/lose count 5.5/14.0. Average score (-5.586206896551724)\n",
+            "Win/lose count 13.0/7.0. Average score (-5.2)\n",
+            "Win/lose count 10.0/10.0. Average score (-5.032258064516129)\n",
+            "Win/lose count 12.0/19.0. Average score (-5.09375)\n",
+            "Win/lose count 8.5/10.0. Average score (-4.984848484848484)\n",
+            "Win/lose count 11.5/16.0. Average score (-4.970588235294118)\n",
+            "Win/lose count 8.0/19.0. Average score (-5.142857142857143)\n",
+            "Win/lose count 6.5/18.0. Average score (-5.319444444444445)\n",
+            "Win/lose count 6.5/17.0. Average score (-5.45945945945946)\n",
+            "Win/lose count 8.5/22.0. Average score (-5.671052631578948)\n",
+            "Win/lose count 12.0/23.0. Average score (-5.8076923076923075)\n",
+            "Win/lose count 9.5/7.0. Average score (-5.6)\n",
+            "Win/lose count 9.0/13.0. Average score (-5.560975609756097)\n",
+            "Win/lose count 11.0/9.0. Average score (-5.380952380952381)\n",
+            "Win/lose count 8.5/13.0. Average score (-5.3604651162790695)\n",
+            "Win/lose count 8.5/13.0. Average score (-5.340909090909091)\n",
+            "Win/lose count 8.0/10.0. Average score (-5.266666666666667)\n",
+            "Win/lose count 7.0/11.0. Average score (-5.239130434782608)\n",
+            "Win/lose count 10.5/19.0. Average score (-5.308510638297872)\n",
+            "Win/lose count 5.5/13.0. Average score (-5.354166666666667)\n",
+            "Win/lose count 11.0/19.0. Average score (-5.408163265306122)\n",
+            "Win/lose count 12.0/20.0. Average score (-5.46)\n",
+            "Win/lose count 14.0/17.0. Average score (-5.411764705882353)\n",
+            "Win/lose count 9.0/11.0. Average score (-5.346153846153846)\n",
+            "Win/lose count 14.0/18.0. Average score (-5.320754716981132)\n",
+            "Win/lose count 9.0/14.0. Average score (-5.314814814814815)\n",
+            "Win/lose count 7.5/6.0. Average score (-5.1909090909090905)\n",
+            "Win/lose count 11.5/21.0. Average score (-5.267857142857143)\n",
+            "Win/lose count 6.0/11.0. Average score (-5.2631578947368425)\n",
+            "Win/lose count 8.5/17.0. Average score (-5.318965517241379)\n",
+            "Win/lose count 12.5/14.0. Average score (-5.254237288135593)\n",
+            "Win/lose count 12.0/14.0. Average score (-5.2)\n",
+            "Win/lose count 10.0/6.0. Average score (-5.049180327868853)\n",
+            "Win/lose count 9.5/15.0. Average score (-5.056451612903226)\n",
+            "Win/lose count 10.0/19.0. Average score (-5.119047619047619)\n",
+            "Win/lose count 9.0/8.0. Average score (-5.0234375)\n",
+            "Win/lose count 12.5/19.0. Average score (-5.046153846153846)\n",
+            "Win/lose count 10.0/6.0. Average score (-4.909090909090909)\n",
+            "Win/lose count 8.0/12.0. Average score (-4.895522388059701)\n",
+            "Win/lose count 9.5/16.0. Average score (-4.919117647058823)\n",
+            "Win/lose count 8.5/14.0. Average score (-4.927536231884058)\n",
+            "Win/lose count 9.0/18.0. Average score (-4.985714285714286)\n",
+            "Win/lose count 8.5/5.0. Average score (-4.866197183098592)\n",
+            "Win/lose count 8.0/14.0. Average score (-4.881944444444445)\n",
+            "Win/lose count 9.0/14.0. Average score (-4.883561643835616)\n",
+            "Win/lose count 4.0/14.0. Average score (-4.952702702702703)\n",
+            "Win/lose count 15.0/16.0. Average score (-4.9)\n",
+            "Win/lose count 10.5/11.0. Average score (-4.842105263157895)\n",
+            "Win/lose count 7.5/15.0. Average score (-4.876623376623376)\n",
+            "Win/lose count 13.5/7.0. Average score (-4.730769230769231)\n",
+            "Win/lose count 4.5/10.0. Average score (-4.7405063291139244)\n",
+            "Win/lose count 8.0/13.0. Average score (-4.74375)\n",
+            "Win/lose count 9.0/5.0. Average score (-4.635802469135802)\n",
+            "Win/lose count 6.5/16.0. Average score (-4.695121951219512)\n",
+            "Win/lose count 10.5/18.0. Average score (-4.728915662650603)\n",
+            "Win/lose count 7.5/17.0. Average score (-4.785714285714286)\n",
+            "Win/lose count 7.0/15.0. Average score (-4.823529411764706)\n",
+            "Win/lose count 5.0/14.0. Average score (-4.872093023255814)\n",
+            "Win/lose count 6.5/11.0. Average score (-4.867816091954023)\n",
+            "Win/lose count 16.0/17.0. Average score (-4.823863636363637)\n",
+            "Win/lose count 10.0/11.0. Average score (-4.780898876404494)\n",
+            "Win/lose count 11.5/15.0. Average score (-4.766666666666667)\n",
+            "Win/lose count 6.0/23.0. Average score (-4.9010989010989015)\n",
+            "Win/lose count 7.0/8.0. Average score (-4.858695652173913)\n",
+            "Win/lose count 15.0/13.0. Average score (-4.78494623655914)\n",
+            "Win/lose count 10.0/13.0. Average score (-4.76595744680851)\n",
+            "Win/lose count 6.0/14.0. Average score (-4.8)\n",
+            "Win/lose count 10.0/11.0. Average score (-4.760416666666667)\n",
+            "Win/lose count 8.5/19.0. Average score (-4.819587628865979)\n",
+            "Win/lose count 13.0/14.0. Average score (-4.780612244897959)\n",
+            "Win/lose count 9.5/13.0. Average score (-4.767676767676767)\n",
+            "Win/lose count 8.5/6.0. Average score (-4.695)\n",
+            "Final score: -4.695\n"
+          ],
+          "name": "stdout"
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<video alt=\"test\" controls>\n",
+              "                <source src=\"data:video/mp4;base64,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AAEAAAAAAAAAAQAAAgAAAAABAAAEAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAABAAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAgAAAAAAgAAAgAAAAACAAAEAAAAAAEAAAYAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAgAAAAAAgAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAYAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAYAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAQAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACAAAAAACAAACAAAAAAEAAAYAAAAAAQAAAgAAAAABAAAEAAAAAAEAAAgAAAAAAgAAAgAAAAADAAAEAAAAAAEAAAgAAAAAAgAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAACAAAEAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAABAAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAgAAAAAAgAAAgAAAAABAAAEAAAAAAEAAAYAAAAAAQAAAgAAAAABAAAIAAAAAAIAAAIAAAAAAQAABAAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAgAAAAAAgAAAgAAAAABAAAGAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAGAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAIAAAAAAIAAAIAAAAAAQAABAAAAAABAAAGAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAgAABAAAAAABAAAGAAAAAAEAAAIAAAAAAQAACAAAAAACAAACAAAAAAEAAAQAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAGAAAAAAEAAAIAAAAAHHN0c2MAAAAAAAAAAQAAAAEAAADKAAAAAQAAAzxzdHN6AAAAAAAAAAAAAADKAAAFnQAAACQAAAAeAAAAFAAAAB4AAAAUAAAAEwAAABQAAAAhAAAAEwAAAB4AAAATAAAAEwAAAB4AAAATAAAAEwAAAB4AAAAcAAAAHwAAAB8AAAAVAAAAEwAAABQAAAAeAAAAJQAAABcAAAAUAAAAHgAAABYAAAASAAAAGwAAABgAAAAUAAAAFAAAAB4AAAATAAAAEQAAAB4AAAAiAAAAFAAAACEAAAAWAAAAEwAAAB8AAAAVAAAAEgAAABYAAAAQAAAAFAAAABMAAAAeAAAAHwAAABgAAAAUAAAAFAAAAB4AAAAVAAAAEAAAABQAAAAUAAAAHQAAABYAAAASAAAAHQAAAB0AAAAjAAAAFAAAABwAAAAUAAAAEwAAABQAAAAeAAAAEwAAABMAAAAgAAAAFAAAABMAAAATAAAAHgAAABMAAAAcAAAAFAAAABMAAAATAAAAIgAAABQAAAAfAAAAFAAAABMAAAATAAAAHQAAAB0AAAAUAAAAEwAAABQAAAAfAAAAFAAAABQAAAATAAAAFgAAABAAAAAUAAAAFAAAAB0AAAATAAAAEQAAACEAAAAUAAAAHQAAABwAAAATAAAAEQAAAB4AAAAcAAAAHQAAAB0AAAATAAAAEwAAABsAAAAZAAAAFAAAABQAAAAbAAAAEgAAABQAAAATAAAAFgAAABgAAAAUAAAAFAAAAB4AAAAdAAAAIQAAABQAAAAUAAAAEwAAAB4AAAAeAAAAGQAAABQAAAAUAAAAHgAAABYAAAASAAAAHgAAACAAAAAUAAAAHQAAABYAAAAUAAAAHgAAAB8AAAAUAAAAEwAAABMAAAAdAAAAFgAAABQAAAAhAAAAFAAAABUAAAAXAAAAFAAAABMAAAAdAAAAFAAAAB8AAAAZAAAAEwAAABMAAAAfAAAAEwAAABMAAAAdAAAAIAAAABQAAAAfAAAAFAAAABMAAAAUAAAAHwAAABQAAAAUAAAAEwAAACAAAAAUAAAAEwAAABQAAAAdAAAAHAAAACEAAAAUAAAAHQAAABUAAAASAAAAHgAAAB4AAAAUAAAAEwAAABQAAAAfAAAAKAAAABRzdGNvAAAAAAAAAAEAAAAwAAAAYnVkdGEAAABabWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAbWRpcmFwcGwAAAAAAAAAAAAAAAAtaWxzdAAAACWpdG9vAAAAHWRhdGEAAAABAAAAAExhdmY1Ny44My4xMDA=\" type=\"video/mp4\" />\n",
+              "             </video>"
+            ],
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 10
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "GIQDgZ45tpWg",
+        "colab_type": "text"
+      },
+      "source": [
+        "***\n",
+        "## DQN"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "D5EeNMf2tpWh",
+        "colab_type": "text"
+      },
+      "source": [
+        "Let us assume here that $T=\\infty$.\n",
+        "\n",
+        "***\n",
+        "__Question 5__ Let $\\pi$ be a policy, show that:\n",
+        "\n",
+        "\\begin{equation*}\n",
+        "Q^{\\pi}(s,a)=E_{(s',a')\\sim p(.|s,a)}[r(s,a)+\\gamma Q^{\\pi}(s',a')]\n",
+        "\\end{equation*}\n",
+        "\n",
+        "Then, show that for the optimal policy $\\pi^*$ (we assume its existence), the following holds: \n",
+        "\n",
+        "\\begin{equation*}\n",
+        "Q^{*}(s,a)=E_{s'\\sim \\pi^*(.|s,a)}[r(s,a)+\\gamma\\max_{a'}Q^{*}(s',a')].\n",
+        "\\end{equation*}\n",
+        "Finally, deduce that a plausible objective is:\n",
+        "\n",
+        "\\begin{equation*}\n",
+        "\\mathcal{L}(\\theta)=E_{s' \\sim \\pi^*(.|s,a)}\\Vert r+\\gamma\\max\\max_{a'}Q(s',a',\\theta)-Q(s,a,\\theta)\\Vert^{2}.\n",
+        "\\end{equation*}\n",
+        "\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "g_Lvud1ftpWi",
+        "colab_type": "text"
+      },
+      "source": [
+        ""
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "r0RR_ruvtpWj",
+        "colab_type": "text"
+      },
+      "source": [
+        "***\n",
+        "The DQN-learning algorithm relies on these derivations to train the parameters $\\theta$ of a Deep Neural Network:\n",
+        "\n",
+        "1. At the state $s_t$, select the action $a_t$ with best reward using $Q_t$ and store the results;\n",
+        "\n",
+        "2. Obtain the new state $s_{t+1}$ from the environment $p$;\n",
+        "\n",
+        "3. Store $(s_t,a_t,s_{t+1})$;\n",
+        "\n",
+        "4. Obtain $Q_{t+1}$ by minimizing  $\\mathcal{L}$ from a recovered batch from the previously stored results.\n",
+        "\n",
+        "***\n",
+        "__Question 6__ Implement the class ```Memory``` that stores moves (in a replay buffer) via ```remember``` and provides a ```random_access``` to these. Specify a maximum memory size to avoid side effects. You can for example use a ```list()``` and set by default ```max_memory=100```."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "yJLiD_Fxybb5",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "class Memory(object):\n",
+        "    def __init__(self, max_memory=100):\n",
+        "        self.max_memory = max_memory\n",
+        "        self.memory = list()\n",
+        "\n",
+        "    def remember(self, m):\n",
+        "        if (len(self.memory) < self.max_memory):\n",
+        "            self.memory.append(m)\n",
+        "        else:\n",
+        "            self.memory.pop(0)\n",
+        "            self.memory.append(m)\n",
+        "\n",
+        "    def is_empty(self):\n",
+        "        return(len(self.memory) == 0)\n",
+        "\n",
+        "    def random_access(self):\n",
+        "        if self.is_empty():\n",
+        "            return None\n",
+        "        else:\n",
+        "            return(self.memory[np.random.randint(0, len(self.memory), size=1)[0]])"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "BxioV6ERtpWo",
+        "colab_type": "text"
+      },
+      "source": [
+        "***\n",
+        "The pipeline we will use for training is given below:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "VAYSwUjhtpWq",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "def train(agent,env,epoch,prefix=''):\n",
+        "    # Number of won games\n",
+        "    score = 0\n",
+        "    loss = 0\n",
+        "\n",
+        "    for e in range(epoch):\n",
+        "        # At each epoch, we restart to a fresh game and get the initial state\n",
+        "        state = env.reset()\n",
+        "        # This assumes that the games will terminate\n",
+        "        game_over = False\n",
+        "\n",
+        "        win = 0\n",
+        "        lose = 0\n",
+        "\n",
+        "        while not game_over:\n",
+        "            # The agent performs an action\n",
+        "            action = agent.act(state)\n",
+        "\n",
+        "            # Apply an action to the environment, get the next state, the reward\n",
+        "            # and if the games end\n",
+        "            prev_state = state\n",
+        "            state, reward, game_over = env.act(action)\n",
+        "\n",
+        "            # Update the counters\n",
+        "            if reward > 0:\n",
+        "                win = win + reward\n",
+        "            if reward < 0:\n",
+        "                lose = lose -reward\n",
+        "\n",
+        "            # Apply the reinforcement strategy\n",
+        "            loss = agent.reinforce(prev_state, state,  action, reward, game_over)\n",
+        "\n",
+        "        # Save as a mp4\n",
+        "        if e % 10 == 0:\n",
+        "            env.draw(prefix+str(e))\n",
+        "\n",
+        "        # Update stats\n",
+        "        score += win-lose\n",
+        "\n",
+        "        print(\"Epoch {:03d}/{:03d} | Loss {:.4f} | Win/lose count {}/{} ({})\"\n",
+        "              .format(e, epoch, loss, win, lose, win-lose))\n",
+        "        agent.save(name_weights=prefix+'model.h5',name_model=prefix+'model.json')"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "iwwmnGAbtpWt",
+        "colab_type": "text"
+      },
+      "source": [
+        "***\n",
+        "__Question 7__ Implement the DQN training algorithm using a cascade of fully connected layers. You can use different learning rate, batch size or memory size parameters. In particular, the loss might oscillate while the player will start to win the games. You have to find a good criterium."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "5AWNBfC7tpWu",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "class DQN(Agent):\n",
+        "    def __init__(self, grid_size,  epsilon = 0.1, memory_size=100, batch_size = 16,n_state=2):\n",
+        "        super(DQN, self).__init__(epsilon = epsilon)\n",
+        "\n",
+        "        # Discount for Q learning\n",
+        "        self.discount = 0.99\n",
+        "        \n",
+        "        self.grid_size = grid_size\n",
+        "        \n",
+        "        # number of state\n",
+        "        self.n_state = n_state\n",
+        "\n",
+        "        # Memory\n",
+        "        self.memory = Memory(memory_size)\n",
+        "        \n",
+        "        # Batch size when learning\n",
+        "        self.batch_size = batch_size\n",
+        "\n",
+        "    def learned_act(self, s):\n",
+        "        n, m, o = s.shape\n",
+        "        s = s.reshape(1, n, m, o)\n",
+        "        Q = self.model.predict(s)\n",
+        "        return np.argmax(Q)\n",
+        "    \n",
+        "    def reinforce(self, s_, n_s_, a_, r_, game_over_):\n",
+        "        # Two steps: first memorize the states, second learn from the pool\n",
+        "        self.memory.remember([s_, n_s_, a_, r_, game_over_])\n",
+        "        \n",
+        "        input_states = np.zeros((self.batch_size, 5,5,self.n_state))\n",
+        "        target_q = np.zeros((self.batch_size, 4))\n",
+        "\n",
+        "        next_states = np.zeros((self.batch_size, 5,5,self.n_state))\n",
+        "        actions = []\n",
+        "        rewards = []\n",
+        "        L_game_over = []\n",
+        "\n",
+        "        for i in range(self.batch_size):\n",
+        "            s_, n_s_, a_, r_, game_over_ = self.memory.random_access()\n",
+        "            input_states[i] = s_\n",
+        "            next_states[i] = n_s_\n",
+        "            actions.append(a_)\n",
+        "            rewards.append(r_)\n",
+        "            L_game_over.append(game_over_)\n",
+        "\n",
+        "        target_q = self.model.predict(input_states)\n",
+        "\n",
+        "        for i in range(self.batch_size):\n",
+        "            game_over_ = L_game_over[i]\n",
+        "            a_ = actions[i]\n",
+        "            r_ = rewards[i]\n",
+        "            n, m, o = s_.shape\n",
+        "            n_s_ = n_s_.reshape(1, n, m, o)\n",
+        "            Q_star = self.model.predict(n_s_)\n",
+        "            if game_over_:\n",
+        "                target_q[i,a_] = r_\n",
+        "            else:\n",
+        "                target_q[i,a_] = r_ + self.discount * np.max(Q_star)\n",
+        "        \n",
+        "        # HINT: Clip the target to avoid exploiding gradients.. -- clipping is a bit tighter\n",
+        "        target_q = np.clip(target_q, -3, 3)\n",
+        "\n",
+        "        l = self.model.train_on_batch(input_states, target_q)\n",
+        "\n",
+        "        return l\n",
+        "\n",
+        "    def save(self,name_weights='model.h5',name_model='model.json'):\n",
+        "        self.model.save_weights(name_weights, overwrite=True)\n",
+        "        with open(name_model, \"w\") as outfile:\n",
+        "            json.dump(self.model.to_json(), outfile)\n",
+        "            \n",
+        "    def load(self,name_weights='model.h5',name_model='model.json'):\n",
+        "        with open(name_model, \"r\") as jfile:\n",
+        "            model = model_from_json(json.load(jfile))\n",
+        "        model.load_weights(name_weights)\n",
+        "        model.compile(\"sgd\", \"mse\")\n",
+        "        self.model = model\n",
+        "\n",
+        "            \n",
+        "class DQN_FC(DQN):\n",
+        "    def __init__(self, *args, lr=0.1,**kwargs):\n",
+        "        super(DQN_FC, self).__init__( *args,**kwargs)\n",
+        "        \n",
+        "        # NN Model\n",
+        "        model = Sequential()\n",
+        "        model.add(keras.layers.Flatten(input_shape=(5, 5, self.n_state)))\n",
+        "        model.add(Dense(units = 32, activation = 'relu'))\n",
+        "        model.add(Dense(units = 16, activation = 'relu'))\n",
+        "        model.add(Dense(self.n_action))\n",
+        "        \n",
+        "        model.compile(sgd(lr=lr, decay=1e-4, momentum=0.0), \"mse\")\n",
+        "        self.model = model"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "4tfecFQCtpWz",
+        "colab_type": "code",
+        "outputId": "f82965f5-8afb-4a8b-baee-69e1e927a42d",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 416
+        }
+      },
+      "source": [
+        "env = Environment(grid_size=size, max_time=T, temperature=0.3)\n",
+        "agent = DQN_FC(size, lr=.1, epsilon = 0.1, memory_size=2000, batch_size = 32)\n",
+        "train(agent, env, epochs_train, prefix='fc_train')\n",
+        "HTML(display_videos('fc_train10.mp4'))"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Epoch 000/100 | Loss 0.0135 | Win/lose count 3.5/10.0 (-6.5)\n",
+            "Epoch 001/100 | Loss 0.0139 | Win/lose count 4.5/3.0 (1.5)\n",
+            "Epoch 002/100 | Loss 0.0070 | Win/lose count 4.5/8.0 (-3.5)\n"
+          ],
+          "name": "stdout"
+        },
+        {
+          "output_type": "error",
+          "ename": "KeyboardInterrupt",
+          "evalue": "ignored",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mKeyboardInterrupt\u001b[0m                         Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-37-1f077705c100>\u001b[0m in \u001b[0;36m<module>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      1\u001b[0m \u001b[0menv\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mEnvironment\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mgrid_size\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0msize\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mmax_time\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mT\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mtemperature\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m0.3\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      2\u001b[0m \u001b[0magent\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mDQN_FC\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0msize\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mlr\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m.1\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mepsilon\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;36m0.1\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mmemory_size\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;36m2000\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mbatch_size\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;36m32\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 3\u001b[0;31m \u001b[0mtrain\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0magent\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0menv\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mepochs_train\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mprefix\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m'fc_train'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      4\u001b[0m \u001b[0mHTML\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mdisplay_videos\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m'fc_train10.mp4'\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m<ipython-input-17-24317fb268aa>\u001b[0m in \u001b[0;36mtrain\u001b[0;34m(agent, env, epoch, prefix)\u001b[0m\n\u001b[1;32m     29\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     30\u001b[0m             \u001b[0;31m# Apply the reinforcement strategy\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 31\u001b[0;31m             \u001b[0mloss\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0magent\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mreinforce\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mprev_state\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mstate\u001b[0m\u001b[0;34m,\u001b[0m  \u001b[0maction\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mreward\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mgame_over\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     32\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     33\u001b[0m         \u001b[0;31m# Save as a mp4\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m<ipython-input-36-366c3e72238a>\u001b[0m in \u001b[0;36mreinforce\u001b[0;34m(self, s_, n_s_, a_, r_, game_over_)\u001b[0m\n\u001b[1;32m     52\u001b[0m             \u001b[0mn\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mm\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mo\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0ms_\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mshape\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     53\u001b[0m             \u001b[0mn_s_\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mn_s_\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mreshape\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;36m1\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mn\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mm\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mo\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 54\u001b[0;31m             \u001b[0mQ_star\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mmodel\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mpredict\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mn_s_\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;31m# np.max(Q[i])\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     55\u001b[0m             \u001b[0;32mif\u001b[0m \u001b[0mgame_over_\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     56\u001b[0m                 \u001b[0mtarget_q\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mi\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0ma_\u001b[0m\u001b[0;34m]\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mr_\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.6/dist-packages/keras/engine/training.py\u001b[0m in \u001b[0;36mpredict\u001b[0;34m(self, x, batch_size, verbose, steps, callbacks, max_queue_size, workers, use_multiprocessing)\u001b[0m\n\u001b[1;32m   1399\u001b[0m                                             \u001b[0mverbose\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mverbose\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1400\u001b[0m                                             \u001b[0msteps\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0msteps\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 1401\u001b[0;31m                                             callbacks=callbacks)\n\u001b[0m\u001b[1;32m   1402\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1403\u001b[0m     def train_on_batch(self, x, y,\n",
+            "\u001b[0;32m/usr/local/lib/python3.6/dist-packages/keras/engine/training_arrays.py\u001b[0m in \u001b[0;36mpredict_loop\u001b[0;34m(model, f, ins, batch_size, verbose, steps, callbacks)\u001b[0m\n\u001b[1;32m    330\u001b[0m             \u001b[0mbatch_logs\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0;34m{\u001b[0m\u001b[0;34m'batch'\u001b[0m\u001b[0;34m:\u001b[0m \u001b[0mbatch_index\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m'size'\u001b[0m\u001b[0;34m:\u001b[0m \u001b[0mlen\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mbatch_ids\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m}\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    331\u001b[0m             \u001b[0mcallbacks\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_call_batch_hook\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m'predict'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m'begin'\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mbatch_index\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mbatch_logs\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 332\u001b[0;31m             \u001b[0mbatch_outs\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mf\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mins_batch\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m    333\u001b[0m             \u001b[0mbatch_outs\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mto_list\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mbatch_outs\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    334\u001b[0m             \u001b[0;32mif\u001b[0m \u001b[0mbatch_index\u001b[0m \u001b[0;34m==\u001b[0m \u001b[0;36m0\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.6/dist-packages/keras/backend/tensorflow_backend.py\u001b[0m in \u001b[0;36m__call__\u001b[0;34m(self, inputs)\u001b[0m\n\u001b[1;32m   2977\u001b[0m                     \u001b[0;32mreturn\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_legacy_call\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0minputs\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   2978\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 2979\u001b[0;31m             \u001b[0;32mreturn\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_call\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0minputs\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   2980\u001b[0m         \u001b[0;32melse\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   2981\u001b[0m             \u001b[0;32mif\u001b[0m \u001b[0mpy_any\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mis_tensor\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mx\u001b[0m\u001b[0;34m)\u001b[0m \u001b[0;32mfor\u001b[0m \u001b[0mx\u001b[0m \u001b[0;32min\u001b[0m \u001b[0minputs\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.6/dist-packages/keras/backend/tensorflow_backend.py\u001b[0m in \u001b[0;36m_call\u001b[0;34m(self, inputs)\u001b[0m\n\u001b[1;32m   2935\u001b[0m             \u001b[0mfetched\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_callable_fn\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m*\u001b[0m\u001b[0marray_vals\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mrun_metadata\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mrun_metadata\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   2936\u001b[0m         \u001b[0;32melse\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 2937\u001b[0;31m             \u001b[0mfetched\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_callable_fn\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m*\u001b[0m\u001b[0marray_vals\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m   2938\u001b[0m         \u001b[0;32mreturn\u001b[0m \u001b[0mfetched\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0mlen\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0moutputs\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   2939\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.6/dist-packages/tensorflow_core/python/client/session.py\u001b[0m in \u001b[0;36m__call__\u001b[0;34m(self, *args, **kwargs)\u001b[0m\n\u001b[1;32m   1470\u001b[0m         ret = tf_session.TF_SessionRunCallable(self._session._session,\n\u001b[1;32m   1471\u001b[0m                                                \u001b[0mself\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0m_handle\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0margs\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m-> 1472\u001b[0;31m                                                run_metadata_ptr)\n\u001b[0m\u001b[1;32m   1473\u001b[0m         \u001b[0;32mif\u001b[0m \u001b[0mrun_metadata\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m   1474\u001b[0m           \u001b[0mproto_data\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mtf_session\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mTF_GetBuffer\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mrun_metadata_ptr\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mKeyboardInterrupt\u001b[0m: "
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "T1MDHXWttpW5",
+        "colab_type": "text"
+      },
+      "source": [
+        "***\n",
+        "***\n",
+        "__Question 8__ Implement the DQN training algorithm using a CNN (for example, 2 convolutional layers and one final fully connected layer)."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "q-zYV8q0tpW7",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "class DQN_CNN(DQN):\n",
+        "    def __init__(self, *args,lr=0.1,**kwargs):\n",
+        "        super(DQN_CNN, self).__init__(*args,**kwargs)\n",
+        "        \n",
+        "        model = Sequential()\n",
+        "        model.add(Conv2D(32, 2, activation = 'relu', input_shape=(5, 5, self.n_state)))\n",
+        "        model.add(Conv2D(16, 2, activation='relu', input_shape=(5, 5, self.n_state)))\n",
+        "        model.add(keras.layers.Flatten())\n",
+        "        model.add(Dense(self.n_action))\n",
+        "        \n",
+        "        model.compile(sgd(lr=lr, decay=1e-4, momentum=0.0), \"mse\")\n",
+        "        self.model = model"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "OZ9RPXUVtpXA",
+        "colab_type": "code",
+        "outputId": "ca4eec6b-63df-43b4-cb89-0ded6c4d278b",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 1000
+        }
+      },
+      "source": [
+        "env = Environment(grid_size=size, max_time=T, temperature=0.3)\n",
+        "agent = DQN_CNN(size, lr=.1, epsilon = 0.1, memory_size=2000, batch_size = 32)\n",
+        "train(agent,env,epochs_train,prefix='cnn_train')\n",
+        "HTML(display_videos('cnn_train10.mp4'))"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Epoch 000/100 | Loss 0.0137 | Win/lose count 4.0/9.0 (-5.0)\n",
+            "Epoch 001/100 | Loss 0.0071 | Win/lose count 3.5/3.0 (0.5)\n",
+            "Epoch 002/100 | Loss 0.0034 | Win/lose count 3.0/1.0 (2.0)\n",
+            "Epoch 003/100 | Loss 0.0006 | Win/lose count 4.0/3.0 (1.0)\n",
+            "Epoch 004/100 | Loss 0.0074 | Win/lose count 2.0/2.0 (0.0)\n",
+            "Epoch 005/100 | Loss 0.0067 | Win/lose count 2.5/4.0 (-1.5)\n",
+            "Epoch 006/100 | Loss 0.0039 | Win/lose count 3.0/4.0 (-1.0)\n",
+            "Epoch 007/100 | Loss 0.0047 | Win/lose count 4.5/7.0 (-2.5)\n",
+            "Epoch 008/100 | Loss 0.0017 | Win/lose count 5.0/2.0 (3.0)\n",
+            "Epoch 009/100 | Loss 0.0024 | Win/lose count 4.5/3.0 (1.5)\n",
+            "Epoch 010/100 | Loss 0.0076 | Win/lose count 2.5/1.0 (1.5)\n",
+            "Epoch 011/100 | Loss 0.0702 | Win/lose count 4.0/5.0 (-1.0)\n",
+            "Epoch 012/100 | Loss 0.0693 | Win/lose count 1.5/4.0 (-2.5)\n",
+            "Epoch 013/100 | Loss 0.0095 | Win/lose count 8.5/1.0 (7.5)\n",
+            "Epoch 014/100 | Loss 0.0493 | Win/lose count 5.0/5.0 (0.0)\n",
+            "Epoch 015/100 | Loss 0.0596 | Win/lose count 1.0/0 (1.0)\n",
+            "Epoch 016/100 | Loss 0.0542 | Win/lose count 11.0/3.0 (8.0)\n",
+            "Epoch 017/100 | Loss 0.0064 | Win/lose count 4.5/7.0 (-2.5)\n",
+            "Epoch 018/100 | Loss 0.0016 | Win/lose count 6.0/2.0 (4.0)\n",
+            "Epoch 019/100 | Loss 0.0080 | Win/lose count 7.5/4.0 (3.5)\n",
+            "Epoch 020/100 | Loss 0.0078 | Win/lose count 11.0/4.0 (7.0)\n",
+            "Epoch 021/100 | Loss 0.0076 | Win/lose count 2.0/6.0 (-4.0)\n",
+            "Epoch 022/100 | Loss 0.0050 | Win/lose count 3.5/3.0 (0.5)\n",
+            "Epoch 023/100 | Loss 0.0128 | Win/lose count 5.5/2.0 (3.5)\n",
+            "Epoch 024/100 | Loss 0.0046 | Win/lose count 4.5/6.0 (-1.5)\n",
+            "Epoch 025/100 | Loss 0.0056 | Win/lose count 9.0/3.0 (6.0)\n",
+            "Epoch 026/100 | Loss 0.0056 | Win/lose count 10.5/2.0 (8.5)\n",
+            "Epoch 027/100 | Loss 0.0020 | Win/lose count 14.5/2.0 (12.5)\n",
+            "Epoch 028/100 | Loss 0.0030 | Win/lose count 8.5/2.0 (6.5)\n",
+            "Epoch 029/100 | Loss 0.0440 | Win/lose count 17.0/4.0 (13.0)\n",
+            "Epoch 030/100 | Loss 0.0043 | Win/lose count 14.0/6.0 (8.0)\n",
+            "Epoch 031/100 | Loss 0.0441 | Win/lose count 7.0/1.0 (6.0)\n",
+            "Epoch 032/100 | Loss 0.0046 | Win/lose count 8.5/4.0 (4.5)\n",
+            "Epoch 033/100 | Loss 0.0034 | Win/lose count 7.0/2.0 (5.0)\n",
+            "Epoch 034/100 | Loss 0.0018 | Win/lose count 12.0/5.0 (7.0)\n",
+            "Epoch 035/100 | Loss 0.0022 | Win/lose count 8.0/2.0 (6.0)\n",
+            "Epoch 036/100 | Loss 0.0014 | Win/lose count 5.5/4.0 (1.5)\n",
+            "Epoch 037/100 | Loss 0.0024 | Win/lose count 8.5/3.0 (5.5)\n",
+            "Epoch 038/100 | Loss 0.0019 | Win/lose count 6.5/2.0 (4.5)\n",
+            "Epoch 039/100 | Loss 0.0016 | Win/lose count 11.5/4.0 (7.5)\n",
+            "Epoch 040/100 | Loss 0.0011 | Win/lose count 16.5/5.0 (11.5)\n",
+            "Epoch 041/100 | Loss 0.0464 | Win/lose count 13.5/2.0 (11.5)\n",
+            "Epoch 042/100 | Loss 0.0025 | Win/lose count 10.5/3.0 (7.5)\n",
+            "Epoch 043/100 | Loss 0.0024 | Win/lose count 12.0/5.0 (7.0)\n",
+            "Epoch 044/100 | Loss 0.0038 | Win/lose count 15.0/7.0 (8.0)\n",
+            "Epoch 045/100 | Loss 0.0025 | Win/lose count 13.5/3.0 (10.5)\n",
+            "Epoch 046/100 | Loss 0.0028 | Win/lose count 12.0/2.0 (10.0)\n",
+            "Epoch 047/100 | Loss 0.0025 | Win/lose count 8.5/1.0 (7.5)\n",
+            "Epoch 048/100 | Loss 0.0014 | Win/lose count 6.5/0 (6.5)\n",
+            "Epoch 049/100 | Loss 0.0462 | Win/lose count 17.0/1.0 (16.0)\n",
+            "Epoch 050/100 | Loss 0.0012 | Win/lose count 13.0/4.0 (9.0)\n",
+            "Epoch 051/100 | Loss 0.0013 | Win/lose count 9.0/1.0 (8.0)\n",
+            "Epoch 052/100 | Loss 0.0030 | Win/lose count 5.5/0 (5.5)\n",
+            "Epoch 053/100 | Loss 0.0028 | Win/lose count 9.0/2.0 (7.0)\n",
+            "Epoch 054/100 | Loss 0.0052 | Win/lose count 5.5/2.0 (3.5)\n",
+            "Epoch 055/100 | Loss 0.0019 | Win/lose count 7.5/5.0 (2.5)\n",
+            "Epoch 056/100 | Loss 0.0036 | Win/lose count 11.0/2.0 (9.0)\n",
+            "Epoch 057/100 | Loss 0.0019 | Win/lose count 5.5/4.0 (1.5)\n",
+            "Epoch 058/100 | Loss 0.0016 | Win/lose count 6.5/1.0 (5.5)\n",
+            "Epoch 059/100 | Loss 0.0073 | Win/lose count 16.5/4.0 (12.5)\n",
+            "Epoch 060/100 | Loss 0.0017 | Win/lose count 17.5/4.0 (13.5)\n",
+            "Epoch 061/100 | Loss 0.0528 | Win/lose count 7.5/0 (7.5)\n",
+            "Epoch 062/100 | Loss 0.0025 | Win/lose count 8.0/2.0 (6.0)\n",
+            "Epoch 063/100 | Loss 0.0021 | Win/lose count 10.0/2.0 (8.0)\n",
+            "Epoch 064/100 | Loss 0.0016 | Win/lose count 7.5/4.0 (3.5)\n",
+            "Epoch 065/100 | Loss 0.0026 | Win/lose count 9.0/1.0 (8.0)\n",
+            "Epoch 066/100 | Loss 0.0019 | Win/lose count 11.0/2.0 (9.0)\n",
+            "Epoch 067/100 | Loss 0.0026 | Win/lose count 14.5/5.0 (9.5)\n",
+            "Epoch 068/100 | Loss 0.0027 | Win/lose count 22.5/3.0 (19.5)\n",
+            "Epoch 069/100 | Loss 0.0023 | Win/lose count 15.5/3.0 (12.5)\n",
+            "Epoch 070/100 | Loss 0.0017 | Win/lose count 13.0/5.0 (8.0)\n",
+            "Epoch 071/100 | Loss 0.0030 | Win/lose count 15.0/6.0 (9.0)\n",
+            "Epoch 072/100 | Loss 0.0044 | Win/lose count 10.0/0 (10.0)\n",
+            "Epoch 073/100 | Loss 0.0022 | Win/lose count 9.5/1.0 (8.5)\n",
+            "Epoch 074/100 | Loss 0.0042 | Win/lose count 6.5/1.0 (5.5)\n",
+            "Epoch 075/100 | Loss 0.0024 | Win/lose count 19.5/2.0 (17.5)\n",
+            "Epoch 076/100 | Loss 0.0098 | Win/lose count 16.5/4.0 (12.5)\n",
+            "Epoch 077/100 | Loss 0.0029 | Win/lose count 17.5/3.0 (14.5)\n",
+            "Epoch 078/100 | Loss 0.0481 | Win/lose count 19.0/1.0 (18.0)\n",
+            "Epoch 079/100 | Loss 0.0033 | Win/lose count 18.5/5.0 (13.5)\n",
+            "Epoch 080/100 | Loss 0.0583 | Win/lose count 12.0/2.0 (10.0)\n",
+            "Epoch 081/100 | Loss 0.0585 | Win/lose count 21.5/4.0 (17.5)\n",
+            "Epoch 082/100 | Loss 0.0017 | Win/lose count 19.5/3.0 (16.5)\n",
+            "Epoch 083/100 | Loss 0.0036 | Win/lose count 16.0/3.0 (13.0)\n",
+            "Epoch 084/100 | Loss 0.0035 | Win/lose count 13.5/4.0 (9.5)\n",
+            "Epoch 085/100 | Loss 0.0023 | Win/lose count 17.5/3.0 (14.5)\n",
+            "Epoch 086/100 | Loss 0.0023 | Win/lose count 21.0/4.0 (17.0)\n",
+            "Epoch 087/100 | Loss 0.0024 | Win/lose count 8.0/2.0 (6.0)\n",
+            "Epoch 088/100 | Loss 0.0020 | Win/lose count 11.5/3.0 (8.5)\n",
+            "Epoch 089/100 | Loss 0.0116 | Win/lose count 17.0/3.0 (14.0)\n",
+            "Epoch 090/100 | Loss 0.0498 | Win/lose count 13.5/6.0 (7.5)\n",
+            "Epoch 091/100 | Loss 0.0092 | Win/lose count 9.0/1.0 (8.0)\n",
+            "Epoch 092/100 | Loss 0.0052 | Win/lose count 13.0/4.0 (9.0)\n",
+            "Epoch 093/100 | Loss 0.0543 | Win/lose count 22.5/4.0 (18.5)\n",
+            "Epoch 094/100 | Loss 0.0033 | Win/lose count 14.5/2.0 (12.5)\n",
+            "Epoch 095/100 | Loss 0.0035 | Win/lose count 11.5/2.0 (9.5)\n",
+            "Epoch 096/100 | Loss 0.0022 | Win/lose count 7.5/6.0 (1.5)\n",
+            "Epoch 097/100 | Loss 0.0034 | Win/lose count 0.5/0 (0.5)\n",
+            "Epoch 098/100 | Loss 0.0022 | Win/lose count 14.5/3.0 (11.5)\n",
+            "Epoch 099/100 | Loss 0.0028 | Win/lose count 11.0/2.0 (9.0)\n"
+          ],
+          "name": "stdout"
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<video alt=\"test\" controls>\n",
+              "                <source src=\"data:video/mp4;base64,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AABIAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY//8AAAAvYXZjQwH0AA3/4QAXZ/QADZGbKCIR0IAAAAMAgAAAGQeKFMsBAAVo6+PESAAAABhzdHRzAAAAAAAAAAEAAADKAAACAAAAABRzdHNzAAAAAAAAAAEAAAABAAAGKGN0dHMAAAAAAAAAwwAAAAMAAAQAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAAEAAAEAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAYAAAAAAQAAAgAAAAADAAAEAAAAAAEAAAYAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAABAAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAYAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAEAAAAABxzdHNjAAAAAAAAAAEAAAABAAAAygAAAAEAAAM8c3RzegAAAAAAAAAAAAAAygAABdAAAAAXAAAAHgAAABYAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFgAAABAAAAAUAAAAFAAAABYAAAAQAAAAFAAAABQAAAAdAAAAHQAAAB0AAAAdAAAAFgAAABAAAAAUAAAAFAAAABYAAAAQAAAAFAAAABQAAAAWAAAAEAAAABQAAAAUAAAAIQAAABMAAAAdAAAAHAAAABwAAAAcAAAAFAAAABYAAAAXAAAAEwAAABMAAAAdAAAAFAAAABMAAAAUAAAAHgAAABYAAAAWAAAAFAAAABQAAAAXAAAAFAAAABQAAAAUAAAAHQAAABQAAAATAAAAFAAAAB0AAAAUAAAAFAAAABMAAAAXAAAAFQAAABQAAAAUAAAAHQAAABQAAAAeAAAAFAAAAB0AAAAUAAAAFAAAABMAAAAXAAAAFQAAABQAAAAUAAAAHQAAABQAAAAeAAAAFAAAAB0AAAAUAAAAFAAAABMAAAAXAAAAEAAAABMAAAATAAAAFwAAABgAAAAUAAAAFAAAAB0AAAAUAAAAHgAAABQAAAAdAAAAFAAAABQAAAATAAAAFwAAABUAAAAUAAAAFAAAAB0AAAAUAAAAHgAAABQAAAAdAAAAFAAAABQAAAATAAAAFwAAABUAAAAUAAAAFAAAABcAAAAQAAAAEwAAABMAAAAgAAAAFAAAAB4AAAAUAAAAHQAAABQAAAAUAAAAEwAAABcAAAAQAAAAEwAAABMAAAAhAAAAFAAAABwAAAAUAAAAEwAAABQAAAAXAAAAEAAAABMAAAATAAAAFwAAABAAAAATAAAAEwAAABYAAAAQAAAAEwAAABMAAAAWAAAAEAAAABMAAAATAAAAFgAAABAAAAATAAAAEwAAAB4AAAAUc3RjbwAAAAAAAAABAAAAMAAAAGJ1ZHRhAAAAWm1ldGEAAAAAAAAAIWhkbHIAAAAAAAAAAG1kaXJhcHBsAAAAAAAAAAAAAAAALWlsc3QAAAAlqXRvbwAAAB1kYXRhAAAAAQAAAABMYXZmNTcuODMuMTAw\" type=\"video/mp4\" />\n",
+              "             </video>"
+            ],
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 21
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "051woXUotpXN",
+        "colab_type": "text"
+      },
+      "source": [
+        "***\n",
+        "***\n",
+        "__Question 9__ Test both algorithms and compare their performances. Which issue(s) do you observe? Observe also different behaviors by changing the temperature."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "Y-5u4aBDtpXO",
+        "colab_type": "code",
+        "outputId": "99044330-419b-474a-a792-bb6cd6fb194a",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 1000
+        }
+      },
+      "source": [
+        "env = Environment(grid_size=size, max_time=T,temperature=0.3)\n",
+        "agent_cnn = DQN_CNN(size, lr=.1, epsilon = 0.1, memory_size=2000, batch_size = 32)\n",
+        "agent_cnn.load(name_weights='cnn_trainmodel.h5',name_model='cnn_trainmodel.json')\n",
+        "\n",
+        "agent_fc = DQN_FC(size, lr=.1, epsilon = 0.1, memory_size=2000, batch_size = 32)\n",
+        "agent_fc.load(name_weights='fc_trainmodel.h5',name_model='fc_trainmodel.json')\n",
+        "print('Test of the CNN')\n",
+        "test(agent_cnn,env,epochs_test,prefix='cnn_test')\n",
+        "print(\"############################################\")\n",
+        "print('Test of the FC')\n",
+        "test(agent_fc,env,epochs_test,prefix='fc_test')"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Test of the CNN\n",
+            "Win/lose count 1.5/0. Average score (1.5)\n",
+            "Win/lose count 3.5/0. Average score (2.5)\n",
+            "Win/lose count 0.5/0. Average score (1.8333333333333333)\n",
+            "Win/lose count 1.0/0. Average score (1.625)\n",
+            "Win/lose count 1.0/0. Average score (1.5)\n",
+            "Win/lose count 1.5/0. Average score (1.5)\n",
+            "Win/lose count 1.5/0. Average score (1.5)\n",
+            "Win/lose count 0.5/0. Average score (1.375)\n",
+            "Win/lose count 0/0. Average score (1.2222222222222223)\n",
+            "Win/lose count 0.5/0. Average score (1.15)\n",
+            "Win/lose count 2.0/1.0. Average score (1.1363636363636365)\n",
+            "Win/lose count 2.5/0. Average score (1.25)\n",
+            "Win/lose count 0.5/0. Average score (1.1923076923076923)\n",
+            "Win/lose count 0/0. Average score (1.1071428571428572)\n",
+            "Win/lose count 0.5/0. Average score (1.0666666666666667)\n",
+            "Win/lose count 0.5/0. Average score (1.03125)\n",
+            "Win/lose count 3.0/0. Average score (1.1470588235294117)\n",
+            "Win/lose count 0.5/0. Average score (1.1111111111111112)\n",
+            "Win/lose count 0.5/0. Average score (1.0789473684210527)\n",
+            "Win/lose count 0.5/0. Average score (1.05)\n",
+            "Win/lose count 0.5/0. Average score (1.0238095238095237)\n",
+            "Win/lose count 2.0/1.0. Average score (1.0227272727272727)\n",
+            "Win/lose count 1.5/0. Average score (1.0434782608695652)\n",
+            "Win/lose count 1.0/0. Average score (1.0416666666666667)\n",
+            "Win/lose count 2.0/0. Average score (1.08)\n",
+            "Win/lose count 1.5/1.0. Average score (1.0576923076923077)\n",
+            "Win/lose count 1.5/1.0. Average score (1.037037037037037)\n",
+            "Win/lose count 1.5/0. Average score (1.0535714285714286)\n",
+            "Win/lose count 1.0/1.0. Average score (1.0172413793103448)\n",
+            "Win/lose count 1.5/0. Average score (1.0333333333333334)\n",
+            "Final score: 1.0333333333333334\n",
+            "Test of the FC\n",
+            "Win/lose count 1.5/3.0. Average score (-1.5)\n",
+            "Win/lose count 0.5/3.0. Average score (-2.0)\n",
+            "Win/lose count 2.0/1.0. Average score (-1.0)\n",
+            "Win/lose count 2.0/7.0. Average score (-2.0)\n",
+            "Win/lose count 0.5/0. Average score (-1.5)\n",
+            "Win/lose count 0.5/0. Average score (-1.1666666666666667)\n",
+            "Win/lose count 0.5/2.0. Average score (-1.2142857142857142)\n",
+            "Win/lose count 0/0. Average score (-1.0625)\n",
+            "Win/lose count 0.5/1.0. Average score (-1.0)\n",
+            "Win/lose count 1.5/4.0. Average score (-1.15)\n",
+            "Win/lose count 0.5/3.0. Average score (-1.2727272727272727)\n",
+            "Win/lose count 1.5/2.0. Average score (-1.2083333333333333)\n",
+            "Win/lose count 1.5/0. Average score (-1.0)\n",
+            "Win/lose count 1.5/3.0. Average score (-1.0357142857142858)\n",
+            "Win/lose count 2.0/1.0. Average score (-0.9)\n",
+            "Win/lose count 0/0. Average score (-0.84375)\n",
+            "Win/lose count 1.5/7.0. Average score (-1.1176470588235294)\n",
+            "Win/lose count 2.5/7.0. Average score (-1.3055555555555556)\n",
+            "Win/lose count 1.0/3.0. Average score (-1.3421052631578947)\n",
+            "Win/lose count 0/0. Average score (-1.275)\n",
+            "Win/lose count 0.5/2.0. Average score (-1.2857142857142858)\n",
+            "Win/lose count 1.0/2.0. Average score (-1.2727272727272727)\n",
+            "Win/lose count 1.0/0. Average score (-1.173913043478261)\n",
+            "Win/lose count 0/1.0. Average score (-1.1666666666666667)\n",
+            "Win/lose count 2.0/3.0. Average score (-1.16)\n",
+            "Win/lose count 1.0/2.0. Average score (-1.1538461538461537)\n",
+            "Win/lose count 1.0/2.0. Average score (-1.1481481481481481)\n",
+            "Win/lose count 0.5/7.0. Average score (-1.3392857142857142)\n",
+            "Win/lose count 0/1.0. Average score (-1.3275862068965518)\n",
+            "Win/lose count 0/0. Average score (-1.2833333333333334)\n",
+            "Final score: -1.2833333333333334\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "-0jpoacetpXV",
+        "colab_type": "code",
+        "outputId": "5ec9fa2b-ddd0-4839-dc0c-aac5dbe34818",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 293
+        }
+      },
+      "source": [
+        "HTML(display_videos('cnn_test10.mp4'))"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<video alt=\"test\" controls>\n",
+              "                <source src=\"data:video/mp4;base64,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CgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAGAAAAAAEAAAIAAAAAHHN0c2MAAAAAAAAAAQAAAAEAAADKAAAAAQAAAzxzdHN6AAAAAAAAAAAAAADKAAAFyAAAABQAAAAVAAAAFAAAABQAAAAeAAAAHQAAAB0AAAAaAAAAEgAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAWAAAAEAAAABQAAAAUAAAAFgAAABAAAAAUAAAAFAAAABYAAAAQAAAAFAAAABQAAAAfAAAAKgAAABRzdGNvAAAAAAAAAAEAAAAwAAAAYnVkdGEAAABabWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAbWRpcmFwcGwAAAAAAAAAAAAAAAAtaWxzdAAAACWpdG9vAAAAHWRhdGEAAAABAAAAAExhdmY1Ny44My4xMDA=\" type=\"video/mp4\" />\n",
+              "             </video>"
+            ],
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 95
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "u8Zg9U0_tpXb",
+        "colab_type": "code",
+        "outputId": "87317a36-469a-4cf8-c737-783c6f7bf533",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 293
+        }
+      },
+      "source": [
+        "HTML(display_videos('fc_test10.mp4'))"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<video alt=\"test\" controls>\n",
+              "                <source src=\"data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAFZltZGF0AAACrQYF//+p3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE1MiByMjg1NCBlOWE1OTAzIC0gSC4yNjQvTVBFRy00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAxNyAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFseXNlPTB4MToweDExMSBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVkX3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MCBjcW09MCBkZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD00IHRocmVhZHM9MyBsb29rYWhlYWRfdGhyZWFkcz0xIHNsaWNlZF90aHJlYWRzPTAgbnI9MCBkZWNpbWF0ZT0xIGludGVybGFjZWQ9MCBibHVyYXlfY29tcGF0PTAgY29uc3RyYWluZWRfaW50cmE9MCBiZnJhbWVzPTMgYl9weXJhbWlkPTIgYl9hZGFwdD0xIGJfYmlhcz0wIGRpcmVjdD0xIHdlaWdodGI9MSBvcGVuX2dvcD0wIHdlaWdodHA9MiBrZXlpbnQ9MjUwIGtleWludF9taW49MjUgc2NlbmVjdXQ9NDAgaW50cmFfcmVmcmVzaD0wIHJjX2xvb2thaGVhZD00MCByYz1jcmYgbWJ0cmVlPTEgY3JmPTIzLjAgcWNvbXA9MC42MCBxcG1pbj0wIHFwbWF4PTY5IHFwc3RlcD00IGlwX3JhdGlvPTEuNDAgYXE9MToxLjAwAIAAAALoZYiEADP//vaG+BTYUyP+T7/8I/+5H7cfWfrixkIJvrVeQ9GAMl8a/5lGYaXpyc8t7R+vTNAEZz6HlLJIofgUkwDfMsjnE+J8s6FP3lFrFWUnapilQooJthtp0b3IbmdUsT9pMZzl8+495NzvBfpkfrJW0+AXMeze1pPm4qadDAgKssZ7cuAKQSQSaDkt9Ka1psHedIgHekFigthCNBHALrKa3VU5YlxLvqPI7ppDCGf7gj5xECqYjmSEaKe+KgtZjkVAzjhJHpQOKcY3/ywPJp85bg8GzqSq2EPvaPVloSB2YiEVFSWfsJIp/dvF/7ST7zH/GgtxANjUj6NaVRir8KApbOJMYaQcujtHYNDQATaJ0f2ij75id/KoE/k6WxSEIW3bHWp5GXqU4BNilYmSbQPhtxwyI9g8S0/bYkuhCU2mMYIwoBPwue+SPDq/BQlhfVrJUWWfp9c5mqi6emaGLuzAhXEeHLo+0w2cHnpLfnQtypr8sVm75jOhCEdW7RVCvF7CEtgAAAMAFyeKMV7TpKToBG5apI82W/wAk0QR3LXQyK1FqGQrLsEPUSjfKaSzSyLcOTxfW4km7RsXlD8WQUJJwYbg3TukiiUMCfqAabpM2L29vBW2KK8oLh7SPK1G62wlTj5NuaZaf8oHZClUBNNNI3xxOXF79QAD5oXydE4PjwIVlJaCj5PEsztIIWIAr1aaYFVopAk8Ia3u4F+ndl8Kb9AKRGCMxLi8RXloJiCu51AAp2lP5IQ6lgNhV3OSEtLSdT67SSPx4A/vRuHR+3eTuRyLTQOo5jRqOqbo3iMU2pM/LwzHYCYlqMyLUsj2HlyT8Iz7csreSM9JJb/Y057HxExp+eoEXjvIwf02+IqLpE7adVvayRhhLj3d3eE+BfdNiWnHBVa/wHTpQTvTmWM3XRVnNARMzmdA1/ukxg2oAszUUd0Pj9Q/rDHQdpK5mhwcunq204CUunlotUBtNSe0JCJgAOmBAAAAE0GaIWxDP/6eEAAirpHP04wKocgAAAAWQZpCPCGTKYQz//6eEAA18hjn6X9zrQAAABdBmmNJ4Q8mUwIZ//6eEABT+DHP0v7mUwAAABlBmoRJ4Q8mUwIb//6nhAAgqALNts+z5tbBAAAAHUGapknhDyZTBRE8M//+nhAAza+5rjn82vv77cUxAAAAEAGexWpCvwArNjy3DZtT5YEAAAAZQZrHSeEPJlMCG//+p4QAUb0T/Vb5j8RSQQAAAB1BmulJ4Q8mUwURPDf//qeEAH7B4cWNUP98dPFvHAAAABABnwhqQr8AaZ2pbhs2pryAAAAAGUGbCknhDyZTAhv//qeEAMfSJ/qt8x+IQcEAAAAZQZsrSeEPJlMCHf/+qZYAnCLDdGIRz6/fMAAAABZBm09J4Q8mUwId//6plgE376vsAHTAAAAADkGfbUURPC//AR6gAq2hAAAAEAGfjHRCvwGJsq7q/Hd+wcEAAAAQAZ+OakK/AYlK2L1dhyNvwQAAABNBm5NJqEFomUwId//+qZYAAJWAAAAADEGfsUURLC//AACygAAAABABn9B0Qr8BibKu6vx3fsHBAAAAEAGf0mpCvwGJSti9XYcjb8AAAAATQZvXSahBbJlMCHf//qmWAACVgAAAAAxBn/VFFSwv/wAAsoEAAAAQAZ4UdEK/AYmyrur8d37BwAAAABABnhZqQr8BiUrYvV2HI2/BAAAAE0GaG0moQWyZTAh3//6plgAAlYEAAAAMQZ45RRUsL/8AALKAAAAAEAGeWHRCvwGJsq7q/Hd+wcEAAAAQAZ5aakK/AYlK2L1dhyNvwAAAABNBml9JqEFsmUwId//+qZYAAJWBAAAADEGefUUVLC//AACygQAAABABnpx0Qr8BibKu6vx3fsHAAAAAEAGenmpCvwGJSti9XYcjb8AAAAATQZqDSahBbJlMCHf//qmWAACVgQAAAAxBnqFFFSwv/wAAsoAAAAAQAZ7AdEK/AYmyrur8d37BwQAAABABnsJqQr8BiUrYvV2HI2/AAAAAE0Gax0moQWyZTAh3//6plgAAlYEAAAAMQZ7lRRUsL/8AALKBAAAAEAGfBHRCvwGJsq7q/Hd+wcEAAAAQAZ8GakK/AYlK2L1dhyNvwQAAABNBmwtJqEFsmUwId//+qZYAAJWAAAAADEGfKUUVLC//AACygAAAABABn0h0Qr8BibKu6vx3fsHBAAAAEAGfSmpCvwGJSti9XYcjb8AAAAATQZtPSahBbJlMCHf//qmWAACVgAAAAAxBn21FFSwv/wAAsoEAAAAQAZ+MdEK/AYmyrur8d37BwQAAABABn45qQr8BiUrYvV2HI2/BAAAAE0Gbk0moQWyZTAh3//6plgAAlYAAAAAMQZ+xRRUsL/8AALKAAAAAEAGf0HRCvwGJsq7q/Hd+wcEAAAAQAZ/SakK/AYlK2L1dhyNvwAAAABNBm9dJqEFsmUwId//+qZYAAJWAAAAADEGf9UUVLC//AACygQAAABABnhR0Qr8BibKu6vx3fsHAAAAAEAGeFmpCvwGJSti9XYcjb8EAAAATQZobSahBbJlMCHf//qmWAACVgQAAAAxBnjlFFSwv/wAAsoAAAAAQAZ5YdEK/AYmyrur8d37BwQAAABABnlpqQr8BiUrYvV2HI2/AAAAAE0GaX0moQWyZTAh3//6plgAAlYEAAAAMQZ59RRUsL/8AALKBAAAAEAGenHRCvwGJsq7q/Hd+wcAAAAAQAZ6eakK/AYlK2L1dhyNvwAAAABNBmoNJqEFsmUwId//+qZYAAJWBAAAADEGeoUUVLC//AACygAAAABABnsB0Qr8BibKu6vx3fsHBAAAAEAGewmpCvwGJSti9XYcjb8AAAAATQZrHSahBbJlMCHf//qmWAACVgQAAAAxBnuVFFSwv/wAAsoEAAAAQAZ8EdEK/AYmyrur8d37BwQAAABABnwZqQr8BiUrYvV2HI2/BAAAAE0GbC0moQWyZTAh3//6plgAAlYAAAAAMQZ8pRRUsL/8AALKAAAAAEAGfSHRCvwGJsq7q/Hd+wcEAAAAQAZ9KakK/AYlK2L1dhyNvwAAAABNBm09JqEFsmUwId//+qZYAAJWAAAAADEGfbUUVLC//AACygQAAABABn4x0Qr8BibKu6vx3fsHBAAAAEAGfjmpCvwGJSti9XYcjb8EAAAATQZuTSahBbJlMCHf//qmWAACVgAAAAAxBn7FFFSwv/wAAsoAAAAAQAZ/QdEK/AYmyrur8d37BwQAAABABn9JqQr8BiUrYvV2HI2/AAAAAE0Gb10moQWyZTAh3//6plgAAlYAAAAAMQZ/1RRUsL/8AALKBAAAAEAGeFHRCvwGJsq7q/Hd+wcAAAAAQAZ4WakK/AYlK2L1dhyNvwQAAABNBmhtJqEFsmUwId//+qZYAAJWBAAAADEGeOUUVLC//AACygAAAABABnlh0Qr8BibKu6vx3fsHBAAAAEAGeWmpCvwGJSti9XYcjb8AAAAATQZpfSahBbJlMCHf//qmWAACVgQAAAAxBnn1FFSwv/wAAsoEAAAAQAZ6cdEK/AYmyrur8d37BwAAAABABnp5qQr8BiUrYvV2HI2/AAAAAE0Gag0moQWyZTAh3//6plgAAlYEAAAAMQZ6hRRUsL/8AALKAAAAAEAGewHRCvwGJsq7q/Hd+wcEAAAAQAZ7CakK/AYlK2L1dhyNvwAAAABNBmsdJqEFsmUwId//+qZYAAJWBAAAADEGe5UUVLC//AACygQAAABABnwR0Qr8BibKu6vx3fsHBAAAAEAGfBmpCvwGJSti9XYcjb8EAAAATQZsLSahBbJlMCHf//qmWAACVgAAAAAxBnylFFSwv/wAAsoAAAAAQAZ9IdEK/AYmyrur8d37BwQAAABABn0pqQr8BiUrYvV2HI2/AAAAAE0GbT0moQWyZTAh3//6plgAAlYAAAAAMQZ9tRRUsL/8AALKBAAAAEAGfjHRCvwGJsq7q/Hd+wcEAAAAQAZ+OakK/AYlK2L1dhyNvwQAAABNBm5NJqEFsmUwId//+qZYAAJWAAAAADEGfsUUVLC//AACygAAAABABn9B0Qr8BibKu6vx3fsHBAAAAEAGf0mpCvwGJSti9XYcjb8AAAAATQZvXSahBbJlMCHf//qmWAACVgAAAAAxBn/VFFSwv/wAAsoEAAAAQAZ4UdEK/AYmyrur8d37BwAAAABABnhZqQr8BiUrYvV2HI2/BAAAAE0GaG0moQWyZTAh3//6plgAAlYEAAAAMQZ45RRUsL/8AALKAAAAAEAGeWHRCvwGJsq7q/Hd+wcEAAAAQAZ5aakK/AYlK2L1dhyNvwAAAABNBml9JqEFsmUwId//+qZYAAJWBAAAADEGefUUVLC//AACygQAAABABnpx0Qr8BibKu6vx3fsHAAAAAEAGenmpCvwGJSti9XYcjb8AAAAATQZqDSahBbJlMCHf//qmWAACVgQAAAAxBnqFFFSwv/wAAsoAAAAAQAZ7AdEK/AYmyrur8d37BwQAAABABnsJqQr8BiUrYvV2HI2/AAAAAE0Gax0moQWyZTAh3//6plgAAlYEAAAAMQZ7lRRUsL/8AALKBAAAAEAGfBHRCvwGJsq7q/Hd+wcEAAAAQAZ8GakK/AYlK2L1dhyNvwQAAABNBmwtJqEFsmUwId//+qZYAAJWAAAAADEGfKUUVLC//AACygAAAABABn0h0Qr8BibKu6vx3fsHBAAAAEAGfSmpCvwGJSti9XYcjb8AAAAATQZtPSahBbJlMCHf//qmWAACVgAAAAAxBn21FFSwv/wAAsoEAAAAQAZ+MdEK/AYmyrur8d37BwQAAABABn45qQr8BiUrYvV2HI2/BAAAAE0Gbk0moQWyZTAh3//6plgAAlYAAAAAMQZ+xRRUsL/8AALKAAAAAEAGf0HRCvwGJsq7q/Hd+wcEAAAAQAZ/SakK/AYlK2L1dhyNvwAAAABNBm9dJqEFsmUwId//+qZYAAJWAAAAADEGf9UUVLC//AACygQAAABABnhR0Qr8BibKu6vx3fsHAAAAAEAGeFmpCvwGJSti9XYcjb8EAAAATQZobSahBbJlMCHf//qmWAACVgQAAAAxBnjlFFSwv/wAAsoAAAAAQAZ5YdEK/AYmyrur8d37BwQAAABABnlpqQr8BiUrYvV2HI2/AAAAAE0GaX0moQWyZTAh3//6plgAAlYEAAAAMQZ59RRUsL/8AALKBAAAAEAGenHRCvwGJsq7q/Hd+wcAAAAAQAZ6eakK/AYlK2L1dhyNvwAAAABNBmoNJqEFsmUwId//+qZYAAJWBAAAADEGeoUUVLC//AACygAAAABABnsB0Qr8BibKu6vx3fsHBAAAAEAGewmpCvwGJSti9XYcjb8AAAAATQZrHSahBbJlMCHf//qmWAACVgQAAAAxBnuVFFSwv/wAAsoEAAAAQAZ8EdEK/AYmyrur8d37BwQAAABABnwZqQr8BiUrYvV2HI2/BAAAAE0GbC0moQWyZTAh3//6plgAAlYAAAAAMQZ8pRRUsL/8AALKAAAAAEAGfSHRCvwGJsq7q/Hd+wcEAAAAQAZ9KakK/AYlK2L1dhyNvwAAAABNBm09JqEFsmUwId//+qZYAAJWAAAAADEGfbUUVLC//AACygQAAABABn4x0Qr8BibKu6vx3fsHBAAAAEAGfjmpCvwGJSti9XYcjb8EAAAATQZuTSahBbJlMCHf//qmWAACVgAAAAAxBn7FFFSwv/wAAsoAAAAAQAZ/QdEK/AYmyrur8d37BwQAAABABn9JqQr8BiUrYvV2HI2/AAAAAE0Gb10moQWyZTAh3//6plgAAlYAAAAAMQZ/1RRUsL/8AALKBAAAAEAGeFHRCvwGJsq7q/Hd+wcAAAAAQAZ4WakK/AYlK2L1dhyNvwQAAABNBmhtJqEFsmUwId//+qZYAAJWBAAAADEGeOUUVLC//AACygAAAABABnlh0Qr8BibKu6vx3fsHBAAAAEAGeWmpCvwGJSti9XYcjb8AAAAASQZpfSahBbJlMCG///qeEAAEnAAAADEGefUUVLC//AACygQAAABABnpx0Qr8BibKu6vx3fsHAAAAAEAGenmpCvwGJSti9XYcjb8AAAAASQZqDSahBbJlMCG///qeEAAEnAAAADEGeoUUVLC//AACygAAAABABnsB0Qr8BibKu6vx3fsHBAAAAEAGewmpCvwGJSti9XYcjb8AAAAASQZrHSahBbJlMCGf//p4QAAR9AAAADEGe5UUVLC//AACygQAAABABnwR0Qr8BibKu6vx3fsHBAAAAEAGfBmpCvwGJSti9XYcjb8EAAAAbQZsJS6hCEFskRggoB/IB/YeAUTCv/jhAABFwAAAAJAGfKGpCvwKvY+1BxN2qw0kjsF791nYzR8HzwR/6Jj6nEm/5uwAADGBtb292AAAAbG12aGQAAAAAAAAAAAAAAAAAAAPoAAAfkAABAAABAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAALinRyYWsAAABcdGtoZAAAAAMAAAAAAAAAAAAAAAEAAAAAAAAfkAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAABEAAAARAAAAAAACRlZHRzAAAAHGVsc3QAAAAAAAAAAQAAH5AAAAQAAAEAAAAACwJtZGlhAAAAIG1kaGQAAAAAAAAAAAAAAAAAADIAAAGUAFXEAAAAAAAtaGRscgAAAAAAAAAAdmlkZQAAAAAAAAAAAAAAAFZpZGVvSGFuZGxlcgAAAAqtbWluZgAAABR2bWhkAAAAAQAAAAAAAAAAAAAAJGRpbmYAAAAcZHJlZgAAAAAAAAABAAAADHVybCAAAAABAAAKbXN0YmwAAACVc3RzZAAAAAAAAAABAAAAhWF2YzEAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAABEAEQAEgAAABIAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY//8AAAAvYXZjQwH0AA3/4QAXZ/QADZGbKCIR0IAAAAMAgAAAGQeKFMsBAAVo6+PESAAAABhzdHRzAAAAAAAAAAEAAADKAAACAAAAABRzdHNzAAAAAAAAAAEAAAABAAAGOGN0dHMAAAAAAAAAxQAAAAUAAAQAAAAAAQAABgAAAAABAAACAAAAAAEAAAQAAAAAAQAABgAAAAABAAACAAAAAAIAAAQAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAoAAAAAAQAABAAAAAABAAAAAAAAAAEAAAIAAAAAAQAACgAAAAABAAAEAAAAAAEAAAAAAAAAAQAAAgAAAAABAAAKAAAAAAEAAAQAAAAAAQAAAAAAAAABAAACAAAAAAEAAAYAAAAAAQAAAgAAAAAcc3RzYwAAAAAAAAABAAAAAQAAAMoAAAABAAADPHN0c3oAAAAAAAAAAAAAAMoAAAWdAAAAFwAAABoAAAAbAAAAHQAAACEAAAAUAAAAHQAAACEAAAAUAAAAHQAAAB0AAAAaAAAAEgAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABcAAAAQAAAAFAAAABQAAAAXAAAAEAAAABQAAAAUAAAAFwAAABAAAAAUAAAAFAAAABYAAAAQAAAAFAAAABQAAAAWAAAAEAAAABQAAAAUAAAAFgAAABAAAAAUAAAAFAAAAB8AAAAoAAAAFHN0Y28AAAAAAAAAAQAAADAAAABidWR0YQAAAFptZXRhAAAAAAAAACFoZGxyAAAAAAAAAABtZGlyYXBwbAAAAAAAAAAAAAAAAC1pbHN0AAAAJal0b28AAAAdZGF0YQAAAAEAAAAATGF2ZjU3LjgzLjEwMA==\" type=\"video/mp4\" />\n",
+              "             </video>"
+            ],
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 96
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "VYzdJJhttpXl",
+        "colab_type": "code",
+        "outputId": "738acd83-ef85-45f5-86fa-2676e0cba6c9",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 1000
+        }
+      },
+      "source": [
+        "agent_cnn = DQN_CNN(size, lr=.1, epsilon = 0.1, memory_size=2000, batch_size = 32)\n",
+        "agent_cnn.load(name_weights='cnn_trainmodel.h5',name_model='cnn_trainmodel.json')\n",
+        "\n",
+        "agent_fc = DQN_FC(size, lr=.1, epsilon = 0.1, memory_size=2000, batch_size = 32)\n",
+        "agent_cnn.load(name_weights='fc_trainmodel.h5',name_model='fc_trainmodel.json')\n",
+        "\n",
+        "L_temperature = [0.1, 0.3, 0.5, 0.7]\n",
+        "for t in L_temperature:\n",
+        "    print(\"############################################\")\n",
+        "    print(\"############# Temperature \" + str(t) + \" ##############\")\n",
+        "    print(\"############################################\")\n",
+        "    env = Environment(grid_size=size, max_time=T,temperature=t)\n",
+        "    print('Test of the CNN')\n",
+        "    test(agent_cnn,env,epochs_test,prefix='cnn_test')\n",
+        "    print(\"############################################\")\n",
+        "    print('Test of the FC')\n",
+        "    test(agent_fc,env,epochs_test,prefix='fc_test')"
+      ],
+      "execution_count": 0,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "############################################\n",
+            "############# Temperature 0.1 ##############\n",
+            "############################################\n",
+            "Test of the CNN\n",
+            "Win/lose count 0.5/0. Average score (0.5)\n",
+            "Win/lose count 1.0/0. Average score (0.75)\n",
+            "Win/lose count 0/2.0. Average score (-0.16666666666666666)\n",
+            "Win/lose count 0/0. Average score (-0.125)\n",
+            "Win/lose count 0.5/0. Average score (0.0)\n",
+            "Win/lose count 0/2.0. Average score (-0.3333333333333333)\n",
+            "Win/lose count 0/0. Average score (-0.2857142857142857)\n",
+            "Win/lose count 0.5/1.0. Average score (-0.3125)\n",
+            "Win/lose count 1.0/1.0. Average score (-0.2777777777777778)\n",
+            "Win/lose count 1.0/0. Average score (-0.15)\n",
+            "Win/lose count 0.5/0. Average score (-0.09090909090909091)\n",
+            "Win/lose count 0/2.0. Average score (-0.25)\n",
+            "Win/lose count 0.5/1.0. Average score (-0.2692307692307692)\n",
+            "Win/lose count 0.5/1.0. Average score (-0.2857142857142857)\n",
+            "Win/lose count 0/5.0. Average score (-0.6)\n",
+            "Win/lose count 0/0. Average score (-0.5625)\n",
+            "Win/lose count 0/1.0. Average score (-0.5882352941176471)\n",
+            "Win/lose count 1.0/1.0. Average score (-0.5555555555555556)\n",
+            "Win/lose count 0/1.0. Average score (-0.5789473684210527)\n",
+            "Win/lose count 0.5/3.0. Average score (-0.675)\n",
+            "Win/lose count 0.5/3.0. Average score (-0.7619047619047619)\n",
+            "Win/lose count 0/0. Average score (-0.7272727272727273)\n",
+            "Win/lose count 0.5/1.0. Average score (-0.717391304347826)\n",
+            "Win/lose count 0/0. Average score (-0.6875)\n",
+            "Win/lose count 0/0. Average score (-0.66)\n",
+            "Win/lose count 0/2.0. Average score (-0.7115384615384616)\n",
+            "Win/lose count 0/0. Average score (-0.6851851851851852)\n",
+            "Win/lose count 0/2.0. Average score (-0.7321428571428571)\n",
+            "Win/lose count 0/1.0. Average score (-0.7413793103448276)\n",
+            "Win/lose count 0.5/0. Average score (-0.7)\n",
+            "Final score: -0.7\n",
+            "############################################\n",
+            "Test of the FC\n",
+            "Win/lose count 0/0. Average score (0.0)\n",
+            "Win/lose count 2.5/3.0. Average score (-0.25)\n",
+            "Win/lose count 1.5/0. Average score (0.3333333333333333)\n",
+            "Win/lose count 0.5/0. Average score (0.375)\n",
+            "Win/lose count 3.0/1.0. Average score (0.7)\n",
+            "Win/lose count 0/0. Average score (0.5833333333333334)\n",
+            "Win/lose count 0.5/0. Average score (0.5714285714285714)\n",
+            "Win/lose count 2.5/1.0. Average score (0.6875)\n",
+            "Win/lose count 1.0/0. Average score (0.7222222222222222)\n",
+            "Win/lose count 0/0. Average score (0.65)\n",
+            "Win/lose count 0/1.0. Average score (0.5)\n",
+            "Win/lose count 0.5/2.0. Average score (0.3333333333333333)\n",
+            "Win/lose count 0.5/0. Average score (0.34615384615384615)\n",
+            "Win/lose count 1.5/2.0. Average score (0.2857142857142857)\n",
+            "Win/lose count 0/0. Average score (0.26666666666666666)\n",
+            "Win/lose count 0/0. Average score (0.25)\n",
+            "Win/lose count 0/1.0. Average score (0.17647058823529413)\n",
+            "Win/lose count 1.0/2.0. Average score (0.1111111111111111)\n",
+            "Win/lose count 1.5/3.0. Average score (0.02631578947368421)\n",
+            "Win/lose count 2.5/0. Average score (0.15)\n",
+            "Win/lose count 0/0. Average score (0.14285714285714285)\n",
+            "Win/lose count 1.5/0. Average score (0.20454545454545456)\n",
+            "Win/lose count 0.5/0. Average score (0.21739130434782608)\n",
+            "Win/lose count 0/0. Average score (0.20833333333333334)\n",
+            "Win/lose count 0.5/0. Average score (0.22)\n",
+            "Win/lose count 1.0/0. Average score (0.25)\n",
+            "Win/lose count 0/0. Average score (0.24074074074074073)\n",
+            "Win/lose count 1.5/1.0. Average score (0.25)\n",
+            "Win/lose count 0/0. Average score (0.2413793103448276)\n",
+            "Win/lose count 0.5/2.0. Average score (0.18333333333333332)\n",
+            "Final score: 0.18333333333333332\n",
+            "############################################\n",
+            "############# Temperature 0.3 ##############\n",
+            "############################################\n",
+            "Test of the CNN\n",
+            "Win/lose count 4.5/2.0. Average score (2.5)\n",
+            "Win/lose count 1.0/3.0. Average score (0.25)\n",
+            "Win/lose count 2.5/2.0. Average score (0.3333333333333333)\n",
+            "Win/lose count 0.5/0. Average score (0.375)\n",
+            "Win/lose count 2.0/2.0. Average score (0.3)\n",
+            "Win/lose count 1.0/1.0. Average score (0.25)\n",
+            "Win/lose count 1.5/2.0. Average score (0.14285714285714285)\n",
+            "Win/lose count 0.5/3.0. Average score (-0.1875)\n",
+            "Win/lose count 1.5/4.0. Average score (-0.4444444444444444)\n",
+            "Win/lose count 0/0. Average score (-0.4)\n",
+            "Win/lose count 0.5/1.0. Average score (-0.4090909090909091)\n",
+            "Win/lose count 1.0/3.0. Average score (-0.5416666666666666)\n",
+            "Win/lose count 1.0/3.0. Average score (-0.6538461538461539)\n",
+            "Win/lose count 1.0/1.0. Average score (-0.6071428571428571)\n",
+            "Win/lose count 2.0/1.0. Average score (-0.5)\n",
+            "Win/lose count 0.5/1.0. Average score (-0.5)\n",
+            "Win/lose count 1.5/5.0. Average score (-0.6764705882352942)\n",
+            "Win/lose count 1.0/0. Average score (-0.5833333333333334)\n",
+            "Win/lose count 0/0. Average score (-0.5526315789473685)\n",
+            "Win/lose count 0.5/0. Average score (-0.5)\n",
+            "Win/lose count 0/1.0. Average score (-0.5238095238095238)\n",
+            "Win/lose count 0/1.0. Average score (-0.5454545454545454)\n",
+            "Win/lose count 0/4.0. Average score (-0.6956521739130435)\n",
+            "Win/lose count 0/0. Average score (-0.6666666666666666)\n",
+            "Win/lose count 1.0/6.0. Average score (-0.84)\n",
+            "Win/lose count 0/0. Average score (-0.8076923076923077)\n",
+            "Win/lose count 0.5/0. Average score (-0.7592592592592593)\n",
+            "Win/lose count 0/3.0. Average score (-0.8392857142857143)\n",
+            "Win/lose count 0.5/1.0. Average score (-0.8275862068965517)\n",
+            "Win/lose count 0/0. Average score (-0.8)\n",
+            "Final score: -0.8\n",
+            "############################################\n",
+            "Test of the FC\n",
+            "Win/lose count 3.5/4.0. Average score (-0.5)\n",
+            "Win/lose count 1.5/0. Average score (0.5)\n",
+            "Win/lose count 0/1.0. Average score (0.0)\n",
+            "Win/lose count 3.0/1.0. Average score (0.5)\n",
+            "Win/lose count 0/2.0. Average score (0.0)\n",
+            "Win/lose count 0/0. Average score (0.0)\n",
+            "Win/lose count 3.0/1.0. Average score (0.2857142857142857)\n",
+            "Win/lose count 0/0. Average score (0.25)\n",
+            "Win/lose count 2.0/3.0. Average score (0.1111111111111111)\n",
+            "Win/lose count 2.5/3.0. Average score (0.05)\n",
+            "Win/lose count 2.0/0. Average score (0.22727272727272727)\n",
+            "Win/lose count 1.5/0. Average score (0.3333333333333333)\n",
+            "Win/lose count 1.0/1.0. Average score (0.3076923076923077)\n",
+            "Win/lose count 3.0/1.0. Average score (0.42857142857142855)\n",
+            "Win/lose count 4.0/4.0. Average score (0.4)\n",
+            "Win/lose count 2.5/1.0. Average score (0.46875)\n",
+            "Win/lose count 0.5/0. Average score (0.47058823529411764)\n",
+            "Win/lose count 0.5/1.0. Average score (0.4166666666666667)\n",
+            "Win/lose count 2.0/2.0. Average score (0.39473684210526316)\n",
+            "Win/lose count 0.5/0. Average score (0.4)\n",
+            "Win/lose count 0.5/1.0. Average score (0.35714285714285715)\n",
+            "Win/lose count 2.0/2.0. Average score (0.3409090909090909)\n",
+            "Win/lose count 0/1.0. Average score (0.2826086956521739)\n",
+            "Win/lose count 0.5/0. Average score (0.2916666666666667)\n",
+            "Win/lose count 3.0/3.0. Average score (0.28)\n",
+            "Win/lose count 0.5/1.0. Average score (0.25)\n",
+            "Win/lose count 2.0/4.0. Average score (0.16666666666666666)\n",
+            "Win/lose count 0.5/1.0. Average score (0.14285714285714285)\n",
+            "Win/lose count 0.5/0. Average score (0.15517241379310345)\n",
+            "Win/lose count 0/0. Average score (0.15)\n",
+            "Final score: 0.15\n",
+            "############################################\n",
+            "############# Temperature 0.5 ##############\n",
+            "############################################\n",
+            "Test of the CNN\n",
+            "Win/lose count 2.0/0. Average score (2.0)\n",
+            "Win/lose count 2.5/7.0. Average score (-1.25)\n",
+            "Win/lose count 0/4.0. Average score (-2.1666666666666665)\n",
+            "Win/lose count 1.5/6.0. Average score (-2.75)\n",
+            "Win/lose count 1.0/3.0. Average score (-2.6)\n",
+            "Win/lose count 0.5/4.0. Average score (-2.75)\n",
+            "Win/lose count 1.0/0. Average score (-2.2142857142857144)\n",
+            "Win/lose count 3.5/4.0. Average score (-2.0)\n",
+            "Win/lose count 3.5/7.0. Average score (-2.1666666666666665)\n",
+            "Win/lose count 1.0/1.0. Average score (-1.95)\n",
+            "Win/lose count 3.5/7.0. Average score (-2.090909090909091)\n",
+            "Win/lose count 3.0/6.0. Average score (-2.1666666666666665)\n",
+            "Win/lose count 2.0/0. Average score (-1.8461538461538463)\n",
+            "Win/lose count 3.0/3.0. Average score (-1.7142857142857142)\n",
+            "Win/lose count 0/1.0. Average score (-1.6666666666666667)\n",
+            "Win/lose count 1.0/0. Average score (-1.5)\n",
+            "Win/lose count 1.0/1.0. Average score (-1.411764705882353)\n",
+            "Win/lose count 0.5/1.0. Average score (-1.3611111111111112)\n",
+            "Win/lose count 2.0/3.0. Average score (-1.3421052631578947)\n",
+            "Win/lose count 3.5/6.0. Average score (-1.4)\n",
+            "Win/lose count 0.5/1.0. Average score (-1.3571428571428572)\n",
+            "Win/lose count 0/0. Average score (-1.2954545454545454)\n",
+            "Win/lose count 3.5/2.0. Average score (-1.173913043478261)\n",
+            "Win/lose count 1.5/3.0. Average score (-1.1875)\n",
+            "Win/lose count 2.0/2.0. Average score (-1.14)\n",
+            "Win/lose count 1.0/0. Average score (-1.0576923076923077)\n",
+            "Win/lose count 0.5/4.0. Average score (-1.1481481481481481)\n",
+            "Win/lose count 3.0/2.0. Average score (-1.0714285714285714)\n",
+            "Win/lose count 0.5/0. Average score (-1.0172413793103448)\n",
+            "Win/lose count 1.0/0. Average score (-0.95)\n",
+            "Final score: -0.95\n",
+            "############################################\n",
+            "Test of the FC\n",
+            "Win/lose count 2.5/4.0. Average score (-1.5)\n",
+            "Win/lose count 3.5/1.0. Average score (0.5)\n",
+            "Win/lose count 1.0/0. Average score (0.6666666666666666)\n",
+            "Win/lose count 2.0/3.0. Average score (0.25)\n",
+            "Win/lose count 0.5/0. Average score (0.3)\n",
+            "Win/lose count 1.0/6.0. Average score (-0.5833333333333334)\n",
+            "Win/lose count 1.5/2.0. Average score (-0.5714285714285714)\n",
+            "Win/lose count 0/1.0. Average score (-0.625)\n",
+            "Win/lose count 4.5/3.0. Average score (-0.3888888888888889)\n",
+            "Win/lose count 2.0/3.0. Average score (-0.45)\n",
+            "Win/lose count 0/0. Average score (-0.4090909090909091)\n",
+            "Win/lose count 1.0/0. Average score (-0.2916666666666667)\n",
+            "Win/lose count 5.0/3.0. Average score (-0.11538461538461539)\n",
+            "Win/lose count 0/1.0. Average score (-0.17857142857142858)\n",
+            "Win/lose count 0/1.0. Average score (-0.23333333333333334)\n",
+            "Win/lose count 2.5/1.0. Average score (-0.125)\n",
+            "Win/lose count 2.5/3.0. Average score (-0.14705882352941177)\n",
+            "Win/lose count 0/0. Average score (-0.1388888888888889)\n",
+            "Win/lose count 1.0/0. Average score (-0.07894736842105263)\n",
+            "Win/lose count 0/1.0. Average score (-0.125)\n",
+            "Win/lose count 0/1.0. Average score (-0.16666666666666666)\n",
+            "Win/lose count 5.0/1.0. Average score (0.022727272727272728)\n",
+            "Win/lose count 1.5/2.0. Average score (0.0)\n",
+            "Win/lose count 2.5/3.0. Average score (-0.020833333333333332)\n",
+            "Win/lose count 2.0/1.0. Average score (0.02)\n",
+            "Win/lose count 1.0/2.0. Average score (-0.019230769230769232)\n",
+            "Win/lose count 2.5/1.0. Average score (0.037037037037037035)\n",
+            "Win/lose count 3.5/2.0. Average score (0.08928571428571429)\n",
+            "Win/lose count 3.0/2.0. Average score (0.1206896551724138)\n",
+            "Win/lose count 4.0/4.0. Average score (0.11666666666666667)\n",
+            "Final score: 0.11666666666666667\n",
+            "############################################\n",
+            "############# Temperature 0.7 ##############\n",
+            "############################################\n",
+            "Test of the CNN\n",
+            "Win/lose count 2.5/0. Average score (2.5)\n",
+            "Win/lose count 2.0/2.0. Average score (1.25)\n",
+            "Win/lose count 2.0/2.0. Average score (0.8333333333333334)\n",
+            "Win/lose count 3.5/4.0. Average score (0.5)\n",
+            "Win/lose count 1.0/1.0. Average score (0.4)\n",
+            "Win/lose count 0.5/2.0. Average score (0.08333333333333333)\n",
+            "Win/lose count 1.5/2.0. Average score (0.0)\n",
+            "Win/lose count 3.0/0. Average score (0.375)\n",
+            "Win/lose count 0.5/1.0. Average score (0.2777777777777778)\n",
+            "Win/lose count 2.0/0. Average score (0.45)\n",
+            "Win/lose count 2.0/1.0. Average score (0.5)\n",
+            "Win/lose count 3.5/4.0. Average score (0.4166666666666667)\n",
+            "Win/lose count 1.5/2.0. Average score (0.34615384615384615)\n",
+            "Win/lose count 0.5/2.0. Average score (0.21428571428571427)\n",
+            "Win/lose count 1.0/1.0. Average score (0.2)\n",
+            "Win/lose count 3.5/2.0. Average score (0.28125)\n",
+            "Win/lose count 7.0/8.0. Average score (0.20588235294117646)\n",
+            "Win/lose count 2.5/2.0. Average score (0.2222222222222222)\n",
+            "Win/lose count 3.5/4.0. Average score (0.18421052631578946)\n",
+            "Win/lose count 0/1.0. Average score (0.125)\n",
+            "Win/lose count 1.0/1.0. Average score (0.11904761904761904)\n",
+            "Win/lose count 4.5/1.0. Average score (0.2727272727272727)\n",
+            "Win/lose count 1.0/0. Average score (0.30434782608695654)\n",
+            "Win/lose count 3.0/2.0. Average score (0.3333333333333333)\n",
+            "Win/lose count 0.5/0. Average score (0.34)\n",
+            "Win/lose count 1.5/3.0. Average score (0.2692307692307692)\n",
+            "Win/lose count 1.0/1.0. Average score (0.25925925925925924)\n",
+            "Win/lose count 4.0/1.0. Average score (0.35714285714285715)\n",
+            "Win/lose count 1.5/2.0. Average score (0.3275862068965517)\n",
+            "Win/lose count 4.5/1.0. Average score (0.43333333333333335)\n",
+            "Final score: 0.43333333333333335\n",
+            "############################################\n",
+            "Test of the FC\n",
+            "Win/lose count 0.5/0. Average score (0.5)\n",
+            "Win/lose count 7.0/5.0. Average score (1.25)\n",
+            "Win/lose count 5.0/2.0. Average score (1.8333333333333333)\n",
+            "Win/lose count 1.5/1.0. Average score (1.5)\n",
+            "Win/lose count 2.0/2.0. Average score (1.2)\n",
+            "Win/lose count 0.5/0. Average score (1.0833333333333333)\n",
+            "Win/lose count 2.0/0. Average score (1.2142857142857142)\n",
+            "Win/lose count 6.0/3.0. Average score (1.4375)\n",
+            "Win/lose count 0.5/2.0. Average score (1.1111111111111112)\n",
+            "Win/lose count 2.5/0. Average score (1.25)\n",
+            "Win/lose count 3.5/1.0. Average score (1.3636363636363635)\n",
+            "Win/lose count 0.5/1.0. Average score (1.2083333333333333)\n",
+            "Win/lose count 8.5/1.0. Average score (1.6923076923076923)\n",
+            "Win/lose count 3.5/2.0. Average score (1.6785714285714286)\n",
+            "Win/lose count 1.0/0. Average score (1.6333333333333333)\n",
+            "Win/lose count 1.0/0. Average score (1.59375)\n",
+            "Win/lose count 1.5/7.0. Average score (1.1764705882352942)\n",
+            "Win/lose count 3.5/3.0. Average score (1.1388888888888888)\n",
+            "Win/lose count 5.5/2.0. Average score (1.263157894736842)\n",
+            "Win/lose count 1.0/0. Average score (1.25)\n",
+            "Win/lose count 2.0/0. Average score (1.2857142857142858)\n",
+            "Win/lose count 1.0/0. Average score (1.2727272727272727)\n",
+            "Win/lose count 0.5/0. Average score (1.2391304347826086)\n",
+            "Win/lose count 1.0/0. Average score (1.2291666666666667)\n",
+            "Win/lose count 6.5/2.0. Average score (1.36)\n",
+            "Win/lose count 2.0/0. Average score (1.3846153846153846)\n",
+            "Win/lose count 6.0/3.0. Average score (1.4444444444444444)\n",
+            "Win/lose count 1.0/3.0. Average score (1.3214285714285714)\n",
+            "Win/lose count 3.0/0. Average score (1.3793103448275863)\n",
+            "Win/lose count 4.0/0. Average score (1.4666666666666666)\n",
+            "Final score: 1.4666666666666666\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "OH8VMj3utpXx",
+        "colab_type": "text"
+      },
+      "source": [
+        ""
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "CPd2LzqhtpX1",
+        "colab_type": "text"
+      },
+      "source": [
+        "***\n",
+        "\n",
+        "The algorithm tends to not explore the map which can be an issue. We propose two ideas in order to encourage exploration:\n",
+        "1. Incorporating a decreasing $\\epsilon$-greedy exploration. You can use the method ```set_epsilon```\n",
+        "2. Append via the environment a new state that describes if a cell has been visited or not\n",
+        "\n",
+        "***\n",
+        "__Question 10__ Design a new ```train_explore``` function and environment class ```EnvironmentExploring``` to tackle the issue of exploration.\n",
+        "\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "VPyt23wdtpX7",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "def train_explore(agent,env,epoch,decreasing_exploration=0.6,prefix=''):\n",
+        "    # Number of won games\n",
+        "    score = 0\n",
+        "    loss = 0\n",
+        "\n",
+        "    for e in range(epoch):\n",
+        "        # At each epoch, we restart to a fresh game and get the initial state\n",
+        "        state = env.reset()\n",
+        "        # This assumes that the games will terminate\n",
+        "        game_over = False\n",
+        "\n",
+        "        win = 0\n",
+        "        lose = 0\n",
+        "\n",
+        "        new_epsilon = agent.epsilon * decreasing_exploration\n",
+        "\n",
+        "        agent.set_epsilon(new_epsilon)\n",
+        "\n",
+        "        while not game_over:\n",
+        "            # The agent performs an action\n",
+        "            action = agent.act(state)\n",
+        "\n",
+        "            # Apply an action to the environment, get the next state, the reward\n",
+        "            # and if the games end\n",
+        "            prev_state = state\n",
+        "            state, reward, game_over = env.act(action)\n",
+        "\n",
+        "            # Update the counters\n",
+        "            if reward > 0:\n",
+        "                win = win + reward\n",
+        "            if reward < 0:\n",
+        "                lose = lose -reward\n",
+        "\n",
+        "            # Apply the reinforcement strategy\n",
+        "            loss = agent.reinforce(prev_state, state,  action, reward, game_over)\n",
+        "\n",
+        "        # Save as a mp4\n",
+        "        if e % 10 == 0:\n",
+        "            env.draw(prefix+str(e))\n",
+        "\n",
+        "        # Update stats\n",
+        "        score += win-lose\n",
+        "\n",
+        "        print(\"Epoch {:03d}/{:03d} | Loss {:.4f} | Win/lose count {}/{} ({})\"\n",
+        "              .format(e, epoch, loss, win, lose, win-lose))\n",
+        "        agent.save(name_weights=prefix+'model.h5',name_model=prefix+'model.json')\n",
+        "    # pass\n",
+        "        \n",
+        "class EnvironmentExploring(object):\n",
+        "    def __init__(self, grid_size=10, max_time=500, temperature=0.1):\n",
+        "        grid_size = grid_size+4\n",
+        "        self.grid_size = grid_size\n",
+        "        self.max_time = max_time\n",
+        "        self.temperature = temperature\n",
+        "\n",
+        "        #board on which one plays\n",
+        "        self.board = np.zeros((grid_size,grid_size))\n",
+        "        self.position = np.zeros((grid_size,grid_size))\n",
+        "\n",
+        "        # coordinate of the cat\n",
+        "        self.x = 0\n",
+        "        self.y = 1\n",
+        "\n",
+        "        # self time\n",
+        "        self.t = 0\n",
+        "\n",
+        "        self.scale=16\n",
+        "\n",
+        "        self.to_draw = np.zeros((max_time+2, grid_size*self.scale, grid_size*self.scale, 3))\n",
+        "\n",
+        "\n",
+        "    def draw(self,e):\n",
+        "        skvideo.io.vwrite(str(e) + '.mp4', self.to_draw)\n",
+        "\n",
+        "    def get_frame(self,t):\n",
+        "        b = np.zeros((self.grid_size,self.grid_size,3))+128\n",
+        "        b[self.board>0,0] = 256\n",
+        "        b[self.board < 0, 2] = 256\n",
+        "        b[self.x,self.y,:]=256\n",
+        "        b[-2:,:,:]=0\n",
+        "        b[:,-2:,:]=0\n",
+        "        b[:2,:,:]=0\n",
+        "        b[:,:2,:]=0\n",
+        "        \n",
+        "        b =  cv2.resize(b, None, fx=self.scale, fy=self.scale, interpolation=cv2.INTER_NEAREST)\n",
+        "\n",
+        "        self.to_draw[t,:,:,:]=b\n",
+        "\n",
+        "\n",
+        "    def act(self, action):\n",
+        "        \"\"\"This function returns the new state, reward and decides if the\n",
+        "        game ends.\"\"\"\n",
+        "\n",
+        "        self.get_frame(int(self.t))\n",
+        "\n",
+        "        self.position = np.zeros((self.grid_size, self.grid_size))\n",
+        "\n",
+        "        self.position[0:2,:]= -1\n",
+        "        self.position[:,0:2] = -1\n",
+        "        self.position[-2:, :] = -1\n",
+        "        self.position[-2:, :] = -1\n",
+        "\n",
+        "        self.position[self.x, self.y] = 1\n",
+        "        if action == 0:\n",
+        "            if self.x == self.grid_size-3:\n",
+        "                self.x = self.x-1\n",
+        "            else:\n",
+        "                self.x = self.x + 1\n",
+        "        elif action == 1:\n",
+        "            if self.x == 2:\n",
+        "                self.x = self.x+1\n",
+        "            else:\n",
+        "                self.x = self.x-1\n",
+        "        elif action == 2:\n",
+        "            if self.y == self.grid_size - 3:\n",
+        "                self.y = self.y - 1\n",
+        "            else:\n",
+        "                self.y = self.y + 1\n",
+        "        elif action == 3:\n",
+        "            if self.y == 2:\n",
+        "                self.y = self.y + 1\n",
+        "            else:\n",
+        "                self.y = self.y - 1\n",
+        "        else:\n",
+        "            RuntimeError('Error: action not recognized')\n",
+        "\n",
+        "        self.t = self.t + 1\n",
+        "        reward = self.board[self.x, self.y]\n",
+        "        self.board[self.x, self.y] = 0\n",
+        "        game_over = self.t > self.max_time\n",
+        "        state = np.concatenate((self.board.reshape(self.grid_size, self.grid_size,1),\n",
+        "                        self.position.reshape(self.grid_size, self.grid_size,1)),axis=2)\n",
+        "        state = state[self.x-2:self.x+3,self.y-2:self.y+3,:]\n",
+        "\n",
+        "        return state, reward, game_over\n",
+        "\n",
+        "    def reset(self):\n",
+        "        \"\"\"This function resets the game and returns the initial state\"\"\"\n",
+        "\n",
+        "        self.x = np.random.randint(3, self.grid_size-3, size=1)[0]\n",
+        "        self.y = np.random.randint(3, self.grid_size-3, size=1)[0]\n",
+        "\n",
+        "\n",
+        "        bonus = 0.5*np.random.binomial(1,self.temperature,size=self.grid_size**2)\n",
+        "        bonus = bonus.reshape(self.grid_size,self.grid_size)\n",
+        "\n",
+        "        malus = -1.0*np.random.binomial(1,self.temperature,size=self.grid_size**2)\n",
+        "        malus = malus.reshape(self.grid_size, self.grid_size)\n",
+        "\n",
+        "        self.to_draw = np.zeros((self.max_time+2, self.grid_size*self.scale, self.grid_size*self.scale, 3))\n",
+        "\n",
+        "\n",
+        "        malus[bonus>0]=0\n",
+        "\n",
+        "        self.board = bonus + malus\n",
+        "\n",
+        "        self.position = np.zeros((self.grid_size, self.grid_size))\n",
+        "        self.position[0:2,:]= -1\n",
+        "        self.position[:,0:2] = -1\n",
+        "        self.position[-2:, :] = -1\n",
+        "        # self.position[-2:, :] = -1\n",
+        "        self.position[:, -2:] = -1\n",
+        "        self.board[self.x,self.y] = 0\n",
+        "        self.t = 0\n",
+        "\n",
+        "        state = np.concatenate((\n",
+        "                               self.board.reshape(self.grid_size, self.grid_size,1),\n",
+        "                        self.position.reshape(self.grid_size, self.grid_size,1)),axis=2)\n",
+        "\n",
+        "        state = state[self.x - 2:self.x + 3, self.y - 2:self.y + 3, :]\n",
+        "        return state\n",
+        "\n",
+        "## In Environment exploring:\n",
+        "# You will have to change n_state to 3 because you will use one more layer!\n",
+        "reward = 0\n",
+        "if train:\n",
+        "    reward = -self.malus_position[self.x, self.y]\n",
+        "self.malus_position[self.x, self.y] = 0.1\n",
+        "\n",
+        "reward = reward + self.board[self.x, self.y]\n",
+        "# 3 \"feature\" states instead of 2\n",
+        "state = np.concatenate((self.malus_position.reshape(self.grid_size, self.grid_size,1),\n",
+        "                                self.board.reshape(self.grid_size, self.grid_size,1),\n",
+        "                        self.position.reshape(self.grid_size, self.grid_size,1)),axis=2)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "dhS4dCbBtpYD",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# Training\n",
+        "env = EnvironmentExploring(grid_size=size, max_time=T, temperature=0.3)\n",
+        "agent = DQN_CNN(size, lr=.1, epsilon = 0.1, memory_size=2000, batch_size = 32,n_state=3)\n",
+        "train_explore(agent, env, epochs_train, prefix='cnn_train_explore')\n",
+        "HTML(display_videos('cnn_train_explore10.mp4'))"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "UdvWvwpXtpYK",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# Evaluation\n",
+        "test(agent,env,epochs_test,prefix='cnn_test_explore')\n",
+        "HTML(display_videos('cnn_test_explore10.mp4'))"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "BpNTZH6StpYW",
+        "colab_type": "text"
+      },
+      "source": [
+        "***\n",
+        "***\n",
+        "__BONUS question__ Use the expert DQN from the previous question to generate some winning games. Train a model that mimicks its behavior. Compare the performances."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "xBh8hoKrtpYb",
+        "colab_type": "text"
+      },
+      "source": [
+        ""
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "GXvYRzaQtpYd",
+        "colab_type": "text"
+      },
+      "source": [
+        "***"
+      ]
+    }
+  ]
+}
